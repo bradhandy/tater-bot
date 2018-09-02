@@ -1,16 +1,84 @@
 plugins {
-    id 'java'
+    id 'org.springframework.boot' version '2.0.4.RELEASE' apply true
 }
 
-group 'net.jackofalltrades'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'antlr'
+apply plugin: 'io.spring.dependency-management'
+
+group 'net.jack-of-all-trades'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
-
 repositories {
+    jcenter()
     mavenCentral()
+    maven { url "https://dl.bintray.com/mockito/maven" }
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+
+    failFast = true
+}
+
+idea {
+    project {
+        languageLevel = '1.8'
+    }
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+// we want the visitor pattern classes generated.
+generateGrammarSource {
+    arguments += ["-visitor"]
+}
+
+dependencyManagement {
+    dependencies {
+        dependencySet(group: 'net.bytebuddy', version: '1.8.10') {
+            entry "byte-buddy"
+            entry "byte-buddy-agent"
+        }
+    }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    antlr 'org.antlr:antlr4:4.7.1'
+
+    compile("com.linecorp.bot:line-bot-spring-boot:2.0.0") {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter-jdbc") {
+        exclude group: 'com.zaxxer', module: 'HikariCP'
+    }
+
+    compile("org.slf4j:slf4j-api:1.7.25")
+
+    runtime("org.postgresql:postgresql:42.2.2")
+    runtime("org.apache.tomcat:tomcat-jdbc")
+    runtime("ch.qos.logback:logback-classic:1.2.3")
+
+    runtime("org.liquibase:liquibase-core")
+
+    testCompile("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
+
+    testCompile("org.mockito:mockito-core:2.19.0")
+    testCompile("org.mockito:mockito-junit-jupiter:2.19.0")
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testCompile("org.junit.jupiter:junit-jupiter-params:5.2.0")
+    testCompile("org.junit.vintage:junit-vintage-engine:5.2.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+
+    // this is used to verify the liquibase functionality against a database.
+    testRuntime("com.h2database:h2")
 }
