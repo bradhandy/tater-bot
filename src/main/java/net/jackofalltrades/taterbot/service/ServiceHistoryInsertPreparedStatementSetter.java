@@ -23,4 +23,8 @@ class ServiceHistoryInsertPreparedStatementSetter implements PreparedStatementSe
         preparedStatement.setTimestamp(6, Timestamp.valueOf(serviceHistory.getEndDate()));
     }
 
+    ServiceHistory getServiceHistory() {
+        return serviceHistory;
+    }
+
 }

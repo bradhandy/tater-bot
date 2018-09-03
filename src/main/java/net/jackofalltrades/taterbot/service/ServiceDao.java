@@ -5,6 +5,7 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
 
 @Repository
 class ServiceDao {
@@ -22,10 +23,10 @@ class ServiceDao {
         return jdbcTemplate.queryForObject("select * from service where code = ?", serviceRowMapper, serviceCode);
     }
 
-    boolean updateServiceStatus(Service service, Service.Status status) {
+    boolean updateServiceStatus(Service service, Service.Status serviceStatus, LocalDateTime serviceStatusDate) {
         int updatedRecordCount = jdbcTemplate.update(
-                "update service set status = ? where code = ? and status = ? and status_date = ?",
-                new ServiceStatusUpdatePreparedStatementSetter(service, status));
+                "update service set status = ?, status_date = ? where code = ? and status = ? and status_date = ?",
+                new ServiceStatusUpdatePreparedStatementSetter(service, serviceStatus, serviceStatusDate));
         if (updatedRecordCount > 1) {
             throw new IncorrectUpdateSemanticsDataAccessException(
                     String.format("Should have update 1 service, but %d were updated.", updatedRecordCount));

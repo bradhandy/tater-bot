@@ -5,9 +5,11 @@ import com.google.common.cache.LoadingCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootConfiguration
+@EnableTransactionManagement
 public class ServiceConfiguration {
 
     @Bean

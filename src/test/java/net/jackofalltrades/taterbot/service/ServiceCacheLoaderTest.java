@@ -6,12 +6,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
 
@@ -40,6 +42,13 @@ class ServiceCacheLoaderTest {
         doReturn(expectedService).when(jdbcTemplate).queryForObject(notNull(), same(serviceRowMapper), eq("code"));
 
         assertSame(expectedService, serviceCacheLoader.load("code"), "The service could not be loaded.");
+    }
+
+    @Test
+    void unknownServiceReturnedWhenNonExistent() throws Exception {
+        doThrow(new IncorrectResultSizeDataAccessException(1, 0)).when(jdbcTemplate)
+                .queryForObject(notNull(), same(serviceRowMapper), eq("notthere"));
+        assertSame(Service.UNKNOWN_SERVICE, serviceCacheLoader.load("notthere"), "The service does not match.");
     }
 
 }

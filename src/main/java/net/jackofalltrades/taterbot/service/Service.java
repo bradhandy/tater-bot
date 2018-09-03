@@ -6,6 +6,11 @@ import java.util.Objects;
 
 public class Service {
 
+    public static final Service UNKNOWN_SERVICE = new Service("unknown", "Unknown Service", Status.DISABLED,
+            LocalDateTime.now(), Status.DISABLED);
+
+    public static final String RECORD_SERVICE_CODE = "record";
+
     public enum Status {
         ENABLED, DISABLED, INACTIVE, ACTIVE;
 
