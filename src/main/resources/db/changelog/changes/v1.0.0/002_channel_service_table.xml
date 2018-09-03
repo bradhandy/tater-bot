@@ -1,0 +1,61 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="create-channel-service-table" author="bhandy" dbms="h2,postgresql">
+        <createTable tableName="channel_service">
+            <column name="channel_id" type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="service_code" type="varchar(32)">
+                <constraints nullable="false"
+                        foreignKeyName="cs_service_code_fk" deleteCascade="true"
+                        referencedTableName="service" referencedColumnNames="code" />
+            </column>
+            <column name="status" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="status_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(256)" />
+        </createTable>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="channel_service" constraintName="cs_service_code_fk" />
+            <dropTable tableName="channel_service" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create-channel-service-history-table" author="bhandy" dbms="h2,postgresql">
+        <createTable tableName="channel_service_history">
+            <column name="channel_id" type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="service_code" type="varchar(32)">
+                <constraints nullable="false" />
+            </column>
+            <column name="status" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="begin_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+            <column name="end_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(256)" />
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="channel_service_history" baseColumnNames="channel_id,service_code"
+                constraintName="channel_service_fk" deleteCascade="true"
+                referencedTableName="channel_service" referencedColumnNames="channel_id,service_code" />
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="channel_service_history" constraintName="channel_service_fk" />
+            <dropTable tableName="channel_service_history" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
