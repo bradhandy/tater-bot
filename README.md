@@ -1,8 +1,10 @@
 # Tater Bot
+![Travis CI Build Status](https://travis-ci.org/bradhandy/tater-bot.svg?branch=master)
+
 Tater Bot is a bot connected to the Line (https://line.me/) chat servers.  Line is the chat platform of
 choice for players in the top-level guilds of Dungeon Boss.
 
-# Planned Features
+### Planned Features
 This chat bot will provide functionality to enhance your Line experience.  The following is a list of the
 functionality provided:
 
@@ -18,11 +20,12 @@ question database for your channel after the session has completed.
   You can also have Tater Bot ask you a question outside of a trivia session.  Tater Bot will keep track
   of your overall progress so you can brag about being the most knowledgeable.
   
-* Service Enable/Disable:  The ability to enable/disable any of the services the bot offers.  If you don't
-want the snarky commentary, then disable it.
+* Service Enable/Disable:  The ability to enable/disable any of the services the bot offers.  Snarky commentary
+  is a service which allows the bot to produce snarky output for certain commands.  If you don't want the snarky
+  commentary, then disable it.  Other services can be enabled/disabled as well.
   
   
-# Dependencies
+### Dependencies
 The bot uses the following software dependencies:
 
 * [[Line Bot SDK for Java](https://github.com/line/line-bot-sdk-java)] (https://github.com/line/line-bot-sdk-java) 
