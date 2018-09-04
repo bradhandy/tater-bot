@@ -39,7 +39,7 @@ class ServiceDaoTest {
 
     @Test
     void retrieveServiceByCode() {
-        Service databaseService = new Service("database", "description", Service.Status.ENABLED,
+        Service databaseService = new Service("database", "description", Service.Status.ACTIVE,
                 LocalDateTime.now(), Service.Status.INACTIVE);
 
         doReturn(databaseService).when(jdbcTemplate)
@@ -56,7 +56,7 @@ class ServiceDaoTest {
         doReturn(1).when(jdbcTemplate)
                 .update(eq(UPDATE_SERVICE_STATUS_SQL), (ServiceStatusUpdatePreparedStatementSetter) notNull());
 
-        assertTrue(serviceDao.updateServiceStatus(databaseService, Service.Status.ENABLED, LocalDateTime.now()));
+        assertTrue(serviceDao.updateServiceStatus(databaseService, Service.Status.ACTIVE, LocalDateTime.now()));
 
         verify(jdbcTemplate, times(1)).update(eq(UPDATE_SERVICE_STATUS_SQL),
                 (ServiceStatusUpdatePreparedStatementSetter) notNull());
@@ -70,7 +70,7 @@ class ServiceDaoTest {
         doReturn(0).when(jdbcTemplate)
                 .update(eq(UPDATE_SERVICE_STATUS_SQL), (ServiceStatusUpdatePreparedStatementSetter) notNull());
 
-        assertFalse(serviceDao.updateServiceStatus(databaseService, Service.Status.ENABLED, LocalDateTime.now()));
+        assertFalse(serviceDao.updateServiceStatus(databaseService, Service.Status.ACTIVE, LocalDateTime.now()));
 
         verify(jdbcTemplate, times(1)).update(eq(UPDATE_SERVICE_STATUS_SQL),
                 (ServiceStatusUpdatePreparedStatementSetter) notNull());
@@ -85,7 +85,7 @@ class ServiceDaoTest {
                 .update(eq(UPDATE_SERVICE_STATUS_SQL), (ServiceStatusUpdatePreparedStatementSetter) notNull());
 
         assertThrows(IncorrectUpdateSemanticsDataAccessException.class,
-                () -> serviceDao.updateServiceStatus(databaseService, Service.Status.ENABLED, LocalDateTime.now()),
+                () -> serviceDao.updateServiceStatus(databaseService, Service.Status.ACTIVE, LocalDateTime.now()),
                 "The update should have failed when updating too many records.");
         verify(jdbcTemplate, times(1)).update(eq(UPDATE_SERVICE_STATUS_SQL),
                 (ServiceStatusUpdatePreparedStatementSetter) notNull());

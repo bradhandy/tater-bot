@@ -12,7 +12,7 @@ public class Service {
     public static final String RECORD_SERVICE_CODE = "record";
 
     public enum Status {
-        ENABLED, DISABLED, INACTIVE, ACTIVE;
+        DISABLED, INACTIVE, ACTIVE;
 
         public static Status fromCode(String code) {
             if (Strings.isNullOrEmpty(code)) {

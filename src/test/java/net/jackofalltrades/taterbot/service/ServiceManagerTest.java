@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 class ServiceManagerTest {
 
     public static final Service DATABASE_SERVICE =
-            new Service("database", "description", Service.Status.ENABLED, LocalDateTime.now(),
+            new Service("database", "description", Service.Status.ACTIVE, LocalDateTime.now(),
                     Service.Status.INACTIVE);
     @Mock
     private JdbcTemplate jdbcTemplate;
@@ -140,7 +140,7 @@ class ServiceManagerTest {
 
     @Test
     void updatingServiceToSameStatusDoesNothing() {
-        serviceManager.updateServiceStatus(DATABASE_SERVICE, Service.Status.ENABLED);
+        serviceManager.updateServiceStatus(DATABASE_SERVICE, Service.Status.ACTIVE);
 
         verify(jdbcTemplate, never()).update(anyString(), (PreparedStatementSetter) notNull());
     }

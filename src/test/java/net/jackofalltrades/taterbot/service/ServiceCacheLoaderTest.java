@@ -36,7 +36,7 @@ class ServiceCacheLoaderTest {
 
     @Test
     void serviceReturnedSuccessfully() throws Exception {
-        Service expectedService = new Service("code", "description", Service.Status.ENABLED, LocalDateTime.now(),
+        Service expectedService = new Service("code", "description", Service.Status.ACTIVE, LocalDateTime.now(),
                 Service.Status.INACTIVE);
 
         doReturn(expectedService).when(jdbcTemplate).queryForObject(notNull(), same(serviceRowMapper), eq("code"));

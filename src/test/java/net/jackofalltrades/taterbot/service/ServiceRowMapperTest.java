@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,19 +22,25 @@ class ServiceRowMapperTest {
     @Mock
     private ResultSet resultSet;
 
+    private ServiceRowMapper serviceRowMapper;
+
+    @BeforeEach
+    void setUpRowMapper() {
+        serviceRowMapper = new ServiceRowMapper();
+    }
+
     @Test
     void serviceRecordRowMapsSuccessfully() throws SQLException {
         LocalDateTime statusDate = LocalDateTime.now().minus(1, ChronoUnit.DAYS);
 
-        setUpMockServiceTableData("code", "description", "enabled", statusDate, "inactive");
+        setUpMockServiceTableData("code", "description", "active", statusDate, "inactive");
 
-        ServiceRowMapper serviceRowMapper = new ServiceRowMapper();
         Service service = serviceRowMapper.mapRow(resultSet, 1);
 
         assertNotNull(service, "There should have been a Service object returned.");
         assertEquals("code", service.getCode(), "The service code did not match.");
         assertEquals("description", service.getDescription(), "The service description did not match.");
-        assertEquals(Service.Status.ENABLED, service.getStatus(), "The service status did not match.");
+        assertEquals(Service.Status.ACTIVE, service.getStatus(), "The service status did not match.");
         assertEquals(statusDate, service.getStatusDate(), "The service status date did not match.");
         assertEquals(Service.Status.INACTIVE, service.getInitialChannelStatus(),
                 "The initial channel status did not match.");
@@ -45,7 +52,6 @@ class ServiceRowMapperTest {
 
         setUpMockServiceTableData("code", "description", "invalid", statusDate, null);
 
-        ServiceRowMapper serviceRowMapper = new ServiceRowMapper();
         Service service = serviceRowMapper.mapRow(resultSet, 1);
 
         assertNotNull(service, "There should have been a Service object returned.");
@@ -63,7 +69,6 @@ class ServiceRowMapperTest {
 
         setUpMockServiceTableData("code", "description", "invalid", null, "active");
 
-        ServiceRowMapper serviceRowMapper = new ServiceRowMapper();
         Service service = serviceRowMapper.mapRow(resultSet, 1);
 
         assertNotNull(service, "There should have been a Service object returned.");
