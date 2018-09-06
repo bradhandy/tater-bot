@@ -1,7 +1,9 @@
 package net.jackofalltrades.taterbot.service;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -39,7 +41,9 @@ class ServiceCacheLoaderTest {
         Service expectedService = new Service("code", "description", Service.Status.ACTIVE, LocalDateTime.now(),
                 Service.Status.INACTIVE);
 
-        doReturn(expectedService).when(jdbcTemplate).queryForObject(notNull(), same(serviceRowMapper), eq("code"));
+        doReturn(expectedService).when(jdbcTemplate)
+                .queryForObject(and(contains("select"), contains("from service")), same(serviceRowMapper),
+                        eq("code"));
 
         assertSame(expectedService, serviceCacheLoader.load("code"), "The service could not be loaded.");
     }

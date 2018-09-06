@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,9 @@ class ServiceHistoryDaoTest {
                 (ServiceHistoryInsertPreparedStatementSetter) notNull());
 
         serviceHistoryDao.insertServiceHistory(serviceHistory);
+
+        verify(jdbcTemplate, times(1)).update(eq(SERVICE_HISTORY_INSERT_STATEMENT),
+                (ServiceHistoryInsertPreparedStatementSetter) notNull());
     }
 
     @Test

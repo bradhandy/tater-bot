@@ -1,6 +1,7 @@
 package net.jackofalltrades.taterbot.service;
 
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -19,6 +20,15 @@ public class ServiceConfiguration {
                 .maximumSize(10)
                 .expireAfterAccess(30, TimeUnit.MINUTES)
                 .build(serviceCacheLoader);
+    }
+
+    @Bean
+    @Autowired
+    LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache(ChannelServiceCacheLoader channelServiceCacheLoader) {
+        return CacheBuilder.newBuilder()
+                .maximumSize(30)
+                .expireAfterAccess(30, TimeUnit.MINUTES)
+                .build(channelServiceCacheLoader);
     }
 
 }

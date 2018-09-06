@@ -1,3 +1,7 @@
+logging:
+  level:
+    ROOT: warn
+
 spring:
   liquibase:
     change-log: classpath:/db/changelog/changelog.xml
