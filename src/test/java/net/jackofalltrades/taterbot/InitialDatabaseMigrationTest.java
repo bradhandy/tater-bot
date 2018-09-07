@@ -25,7 +25,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
-class InitialDatabaseMigrationTest {
+public class InitialDatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =
             ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC").put("SERVICE_HISTORY", "PUBLIC")
@@ -37,7 +37,7 @@ class InitialDatabaseMigrationTest {
     @Autowired private ServiceManager serviceManager;
 
     @Test
-    void databaseTablesCreatedSuccessfully() {
+    public void databaseTablesCreatedSuccessfully() {
         Map<String, String> actualTableToSchemaMap =
                 testDatabaseTemplate.query("show tables from public", (ResultSetExtractor<Map<String, String>>) rs -> {
                     ImmutableMap.Builder<String, String> tableToSchemaMap = ImmutableMap.builder();
@@ -53,13 +53,13 @@ class InitialDatabaseMigrationTest {
     }
 
     @Test
-    void serviceTableFunctionalityWorksCorrectly() {
+    public void serviceTableFunctionalityWorksCorrectly() {
         recordServiceCreatedSuccessfully();
         updatingRecordStatusCreatesHistoryRecord();
     }
 
     @Test
-    void missingServiceReturnsUnknownService() {
+    public void missingServiceReturnsUnknownService() {
         assertSame("The service does not match.", Service.UNKNOWN_SERVICE,
                 serviceManager.findServiceByCode("notthere"));
     }
