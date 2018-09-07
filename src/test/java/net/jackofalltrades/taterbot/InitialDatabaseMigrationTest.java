@@ -16,11 +16,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -28,7 +25,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
-public class InitialDatabaseMigrationTest {
+class InitialDatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =
             ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC").put("SERVICE_HISTORY", "PUBLIC")
@@ -40,7 +37,7 @@ public class InitialDatabaseMigrationTest {
     @Autowired private ServiceManager serviceManager;
 
     @Test
-    public void databaseTablesCreatedSuccessfully() {
+    void databaseTablesCreatedSuccessfully() {
         Map<String, String> actualTableToSchemaMap =
                 testDatabaseTemplate.query("show tables from public", (ResultSetExtractor<Map<String, String>>) rs -> {
                     ImmutableMap.Builder<String, String> tableToSchemaMap = ImmutableMap.builder();
@@ -56,13 +53,13 @@ public class InitialDatabaseMigrationTest {
     }
 
     @Test
-    public void serviceTableFunctionalityWorksCorrectly() {
+    void serviceTableFunctionalityWorksCorrectly() {
         recordServiceCreatedSuccessfully();
         updatingRecordStatusCreatesHistoryRecord();
     }
 
     @Test
-    public void missingServiceReturnsUnknownService() {
+    void missingServiceReturnsUnknownService() {
         assertSame("The service does not match.", Service.UNKNOWN_SERVICE,
                 serviceManager.findServiceByCode("notthere"));
     }

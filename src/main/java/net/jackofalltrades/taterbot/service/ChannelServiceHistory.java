@@ -6,13 +6,13 @@ import java.util.Objects;
 public class ChannelServiceHistory {
 
     private final String channelId;
-    private final Service service;
+    private final String service;
     private final Service.Status status;
     private final LocalDateTime beginDate;
     private final LocalDateTime endDate;
     private final String userId;
 
-    public ChannelServiceHistory(String channelId, Service service, Service.Status status, LocalDateTime beginDate,
+    public ChannelServiceHistory(String channelId, String service, Service.Status status, LocalDateTime beginDate,
             LocalDateTime endDate, String userId) {
         this.channelId = channelId;
         this.service = service;
@@ -26,7 +26,7 @@ public class ChannelServiceHistory {
         return channelId;
     }
 
-    public Service getService() {
+    public String getService() {
         return service;
     }
 

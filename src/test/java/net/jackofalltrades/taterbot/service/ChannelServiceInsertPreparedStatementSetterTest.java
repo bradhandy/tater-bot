@@ -21,7 +21,7 @@ class ChannelServiceInsertPreparedStatementSetterTest {
     private PreparedStatement preparedStatement;
 
     @Test
-    void verifyFieldsSetCorrectly() throws SQLException {
+    void fieldsSetCorrectly() throws SQLException {
         LocalDateTime currentDateTime = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
                 currentDateTime, "user_id");
@@ -39,7 +39,7 @@ class ChannelServiceInsertPreparedStatementSetterTest {
     }
 
     @Test
-    void verifyFieldsSetCorrectlyWhenUserIdIsNull() throws SQLException {
+    void fieldsSetCorrectlyWhenUserIdIsNull() throws SQLException {
         LocalDateTime currentDateTime = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
                 currentDateTime, null);
@@ -57,7 +57,7 @@ class ChannelServiceInsertPreparedStatementSetterTest {
     }
 
     @Test
-    void verifyFieldsSetCorrectlyWhenUserIdIsEmpty() throws SQLException {
+    void fieldsSetCorrectlyWhenUserIdIsEmpty() throws SQLException {
         LocalDateTime currentDateTime = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
                 currentDateTime, "");
