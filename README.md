@@ -1,5 +1,5 @@
 # Tater Bot
-![Travis CI Build Status](https://travis-ci.org/bradhandy/tater-bot.svg?branch=master)
+[![Travis CI Build Status](https://travis-ci.org/bradhandy/tater-bot.svg?branch=master)](https://www.travis-ci.org/bradhandy/tater-bot)
 
 Tater Bot is a bot connected to the Line (https://line.me/) chat servers.  Line is the chat platform of
 choice for players in the top-level guilds of Dungeon Boss.
