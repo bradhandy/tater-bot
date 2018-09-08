@@ -4,17 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
 class ChannelServiceDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final ChannelServiceRowMapper channelServiceRowMapper;
+    private final StringColumnListResultSetExtractor stringColumnListResultSetExtractor;
 
     @Autowired
     ChannelServiceDao(JdbcTemplate jdbcTemplate, ChannelServiceRowMapper channelServiceRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.channelServiceRowMapper = channelServiceRowMapper;
+        this.stringColumnListResultSetExtractor = new StringColumnListResultSetExtractor("code");
     }
 
     ChannelService findChannelService(ChannelServiceKey channelServiceKey) {
@@ -47,4 +50,12 @@ class ChannelServiceDao {
         return recordsUpdated == 1;
     }
 
+    List<String> findMissingServicesForChannel(String channelId) {
+        return jdbcTemplate.query(
+                "select code " +
+                        "from service left outer join (select * from channel_service where channel_id = ?) cs " +
+                        "       on (cs.service_code = service.code) " +
+                        "where cs.service_code is null", stringColumnListResultSetExtractor,
+                channelId);
+    }
 }

@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 @ExtendWith(MockitoExtension.class)
 class ServiceManagerTest {
 
-    public static final Service DATABASE_SERVICE =
+    private static final Service DATABASE_SERVICE =
             new Service("database", "description", Service.Status.ACTIVE, LocalDateTime.now(),
                     Service.Status.INACTIVE);
     @Mock

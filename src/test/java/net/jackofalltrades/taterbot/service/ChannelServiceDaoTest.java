@@ -6,13 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,13 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelServiceDaoTest {
 
-    public static final String CHANNEL_SERVICE_INSERT_SQL =
-            "insert into channel_service (channel_id, service_code, status, status_date, user_id) " +
-                    "values (?, ?, ?, ?, ?)";
     @Mock
     private JdbcTemplate jdbcTemplate;
 
@@ -42,8 +42,8 @@ class ChannelServiceDaoTest {
     @Test
     void retrieveByChannelServiceKey() {
         ChannelServiceKey channelServiceKey = new ChannelServiceKey("channelId", "service");
-        ChannelService databaseChannelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService databaseChannelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
         doReturn(databaseChannelService).when(jdbcTemplate)
                 .queryForObject(eq("select * from channel_service where channel_id = ? and service_code = ?"),
@@ -55,18 +55,20 @@ class ChannelServiceDaoTest {
 
     @Test
     void insertNewChannelService() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
-        doReturn(1).when(jdbcTemplate).update(eq(CHANNEL_SERVICE_INSERT_SQL),
-                (ChannelServiceInsertPreparedStatementSetter) notNull());
+        doReturn(1).when(jdbcTemplate)
+                .update(and(contains("insert into channel_service"), contains("values (?, ?, ?, ?, ?)")),
+                        (ChannelServiceInsertPreparedStatementSetter) notNull());
 
         channelServiceDao.insertChannelService(channelService);
 
         ArgumentCaptor<ChannelServiceInsertPreparedStatementSetter> channelServiceInsertPreparedStatementSetterCaptor =
                 ArgumentCaptor.forClass(ChannelServiceInsertPreparedStatementSetter.class);
-        verify(jdbcTemplate, times(1)).update(eq(CHANNEL_SERVICE_INSERT_SQL),
-                channelServiceInsertPreparedStatementSetterCaptor.capture());
+        verify(jdbcTemplate, times(1))
+                .update(and(contains("insert into channel_service"), contains("values (?, ?, ?, ?, ?)")),
+                        channelServiceInsertPreparedStatementSetterCaptor.capture());
 
         assertSame(channelService, channelServiceInsertPreparedStatementSetterCaptor.getValue().getChannelService(),
                 "The channel service inserted does not match.");
@@ -74,30 +76,33 @@ class ChannelServiceDaoTest {
 
     @Test
     void insertNewChannelServiceFails() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
-        doReturn(0).when(jdbcTemplate).update(eq(CHANNEL_SERVICE_INSERT_SQL),
-                (ChannelServiceInsertPreparedStatementSetter) notNull());
+        doReturn(0).when(jdbcTemplate)
+                .update(and(contains("insert into channel_service"), contains("values (?, ?, ?, ?, ?)")),
+                        (ChannelServiceInsertPreparedStatementSetter) notNull());
 
         assertThrows(IncorrectUpdateSemanticsDataAccessException.class,
                 () -> channelServiceDao.insertChannelService(channelService));
 
-        verify(jdbcTemplate, times(1)).update(eq(CHANNEL_SERVICE_INSERT_SQL),
-                (ChannelServiceInsertPreparedStatementSetter) notNull());
+        verify(jdbcTemplate, times(1))
+                .update(and(contains("insert into channel_service"), contains("values (?, ?, ?, ?, ?)")),
+                        (ChannelServiceInsertPreparedStatementSetter) notNull());
     }
 
     @Test
     void updateChannelServiceStatusWithUserId() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
         doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertTrue(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
-                "updatingUser"));
+        assertTrue(
+                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
 
-        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator> channelServiceUpdatePreparedStatementCreatorCaptor =
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
+                channelServiceUpdatePreparedStatementCreatorCaptor =
                 ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
         verify(jdbcTemplate, times(1)).update(channelServiceUpdatePreparedStatementCreatorCaptor.capture());
 
@@ -113,14 +118,15 @@ class ChannelServiceDaoTest {
 
     @Test
     void updateChannelServiceStatusWithoutUpdatingUserId() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
         doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
         assertTrue(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.DISABLED, null));
 
-        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator> channelServiceUpdatePreparedStatementCreatorCaptor =
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
+                channelServiceUpdatePreparedStatementCreatorCaptor =
                 ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
         verify(jdbcTemplate, times(1)).update(channelServiceUpdatePreparedStatementCreatorCaptor.capture());
 
@@ -136,25 +142,35 @@ class ChannelServiceDaoTest {
 
     @Test
     void updateChannelServiceStatusFails() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
         doReturn(0).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertFalse(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
-                "updatingUser"));
+        assertFalse(
+                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
     }
 
     @Test
     void updateChannelServiceStatusAffectsTooManyRecords() {
-        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
-                LocalDateTime.now(), "userId");
+        ChannelService channelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
         doReturn(2).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertThrows(IncorrectUpdateSemanticsDataAccessException.class,
-                () -> channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
-                        "updatingUser"));
+        assertThrows(IncorrectUpdateSemanticsDataAccessException.class, () -> channelServiceDao
+                .updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
+    }
+
+    @Test
+    void findMissingServices() {
+        ArrayList<String> expectedMissingServicesList = Lists.newArrayList("service", "missing");
+
+        doReturn(expectedMissingServicesList).when(jdbcTemplate)
+                .query(and(contains("select code"), contains("service left outer join")),
+                        (StringColumnListResultSetExtractor) notNull(), eq("channelId"));
+
+        assertSame(expectedMissingServicesList, channelServiceDao.findMissingServicesForChannel("channelId"));
     }
 
 }
