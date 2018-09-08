@@ -2,6 +2,7 @@ package net.jackofalltrades.taterbot.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -12,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -20,6 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import net.jackofalltrades.taterbot.util.MockitoParameterResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
@@ -122,7 +125,8 @@ class ChannelServiceManagerTest {
                 ArgumentCaptor.forClass(ChannelServiceInsertPreparedStatementSetter.class);
         verify(jdbcTemplate, times(1))
                 .query(and(contains("select code"), contains("service left outer join")),
-                        (StringColumnListResultSetExtractor) notNull(), eq("channelId"));
+                        (StringColumnListResultSetExtractor) notNull(),
+                        eq("channelId"));
         verify(jdbcTemplate, times(2))
                 .update(contains("insert into channel_service ("),
                         channelServiceInsertPreparedStatementSetterCaptor.capture());
@@ -139,6 +143,189 @@ class ChannelServiceManagerTest {
                     "The channel status date is not within the expected bounds.");
             assertNull(channelService.getUserId(), "The user id should be missing.");
         }
+    }
+
+    @Test
+    void nothingIsAddedToChannelWhenNothingIsMissing() {
+        doReturn(Lists.newArrayList())
+                .when(jdbcTemplate)
+                .query(and(contains("select code"), contains("service left outer join")),
+                        (StringColumnListResultSetExtractor) notNull(),
+                        eq("channelId-has-all"));
+
+        channelServiceManager.addMissingServicesToChannel("channelId-has-all");
+
+        verify(jdbcTemplate, times(1))
+                .query(and(contains("select code"), contains("service left outer join")),
+                        (StringColumnListResultSetExtractor) notNull(),
+                        eq("channelId-has-all"));
+        verify(jdbcTemplate, never())
+                .update(contains("insert into channel_service ("),
+                        (ChannelServiceInsertPreparedStatementSetter) notNull());
+    }
+
+    @Test
+    @ExtendWith(MockitoParameterResolver.class)
+    void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithoutUserIdOnOriginalChannelService(
+            @Mock LoadingCache<String, Service> serviceCache,
+            @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {
+        channelServiceManager =
+                new ChannelServiceManager(channelServiceCache, channelServiceDao, channelServiceHistoryDao,
+                        serviceCache);
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(5, ChronoUnit.HOURS);
+        ChannelService originalChannelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
+                originalStatusDate, null);
+
+        doReturn(1)
+                .when(jdbcTemplate)
+                .update((ChannelServiceUpdatePreparedStatementCreator) notNull());
+        doReturn(1)
+                .when(jdbcTemplate)
+                .update(contains("insert into channel_service_history"),
+                        (ChannelServiceHistoryPreparedStatementSetter) notNull());
+
+        channelServiceManager.updateChannelServiceStatus(originalChannelService, Service.Status.INACTIVE, null);
+
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator> channelServiceUpdatePreparedStatementCreatorArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
+        ArgumentCaptor<ChannelServiceHistoryPreparedStatementSetter> channelServiceHistoryPreparedStatementSetterArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceHistoryPreparedStatementSetter.class);
+        verify(jdbcTemplate, times(1))
+                .update(channelServiceUpdatePreparedStatementCreatorArgumentCaptor.capture());
+        verify(jdbcTemplate, times(1))
+                .update(contains("insert into channel_service_history"),
+                        channelServiceHistoryPreparedStatementSetterArgumentCaptor.capture());
+        verify(channelServiceCache, times(1)).refresh(new ChannelServiceKey("channelId", "service"));
+
+        ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
+                channelServiceUpdatePreparedStatementCreatorArgumentCaptor.getValue();
+        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
+                channelServiceHistoryPreparedStatementSetterArgumentCaptor.getValue();
+
+        ChannelService channelService = channelServiceUpdatePreparedStatementCreator.getChannelService();
+        assertSame(originalChannelService, channelService, "The channel service updated does not match.");
+        assertEquals(Service.Status.INACTIVE, channelServiceUpdatePreparedStatementCreator.getChannelServiceStatus(),
+                "The new status does not match.");
+        assertNull(channelServiceUpdatePreparedStatementCreator.getUpdatingUser(),
+                "The updating user should have been null.");
+
+        LocalDateTime updatedChannelServiceStatusDate =
+                channelServiceUpdatePreparedStatementCreator.getChannelServiceStatusDate();
+        ChannelServiceHistory channelServiceHistory =
+                channelServiceHistoryPreparedStatementSetter.getChannelServiceHistory();
+        assertEquals(originalStatusDate, channelServiceHistory.getBeginDate(),
+                "The history status begin date does not match.");
+        assertEquals(updatedChannelServiceStatusDate, channelServiceHistory.getEndDate(),
+                "The history status end date does not match.");
+    }
+
+    @Test
+    @ExtendWith(MockitoParameterResolver.class)
+    void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithUserIdOnOriginalChannelService(
+            @Mock LoadingCache<String, Service> serviceCache,
+            @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {
+        channelServiceManager =
+                new ChannelServiceManager(channelServiceCache, channelServiceDao, channelServiceHistoryDao,
+                        serviceCache);
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(5, ChronoUnit.HOURS);
+        ChannelService originalChannelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
+                originalStatusDate, "userId");
+
+        doReturn(1)
+                .when(jdbcTemplate)
+                .update((ChannelServiceUpdatePreparedStatementCreator) notNull());
+        doReturn(1)
+                .when(jdbcTemplate)
+                .update(contains("insert into channel_service_history"),
+                        (ChannelServiceHistoryPreparedStatementSetter) notNull());
+
+        channelServiceManager.updateChannelServiceStatus(originalChannelService, Service.Status.INACTIVE, null);
+
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator> channelServiceUpdatePreparedStatementCreatorArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
+        ArgumentCaptor<ChannelServiceHistoryPreparedStatementSetter> channelServiceHistoryPreparedStatementSetterArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceHistoryPreparedStatementSetter.class);
+        verify(jdbcTemplate, times(1))
+                .update(channelServiceUpdatePreparedStatementCreatorArgumentCaptor.capture());
+        verify(jdbcTemplate, times(1))
+                .update(contains("insert into channel_service_history"),
+                        channelServiceHistoryPreparedStatementSetterArgumentCaptor.capture());
+        verify(channelServiceCache, times(1)).refresh(new ChannelServiceKey("channelId", "service"));
+
+        ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
+                channelServiceUpdatePreparedStatementCreatorArgumentCaptor.getValue();
+        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
+                channelServiceHistoryPreparedStatementSetterArgumentCaptor.getValue();
+
+        ChannelService channelService = channelServiceUpdatePreparedStatementCreator.getChannelService();
+        assertSame(originalChannelService, channelService, "The channel service updated does not match.");
+        assertEquals(Service.Status.INACTIVE, channelServiceUpdatePreparedStatementCreator.getChannelServiceStatus(),
+                "The new status does not match.");
+        assertNull(channelServiceUpdatePreparedStatementCreator.getUpdatingUser(),
+                "The updating user should have been null.");
+
+        LocalDateTime updatedChannelServiceStatusDate =
+                channelServiceUpdatePreparedStatementCreator.getChannelServiceStatusDate();
+        ChannelServiceHistory channelServiceHistory =
+                channelServiceHistoryPreparedStatementSetter.getChannelServiceHistory();
+        assertEquals(originalStatusDate, channelServiceHistory.getBeginDate(),
+                "The history status begin date does not match.");
+        assertEquals(updatedChannelServiceStatusDate, channelServiceHistory.getEndDate(),
+                "The history status end date does not match.");
+    }
+
+    @Test
+    @ExtendWith(MockitoParameterResolver.class)
+    void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithDifferentUserIdOnOriginalChannelService(
+            @Mock LoadingCache<String, Service> serviceCache,
+            @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {
+        channelServiceManager =
+                new ChannelServiceManager(channelServiceCache, channelServiceDao, channelServiceHistoryDao,
+                        serviceCache);
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(5, ChronoUnit.HOURS);
+        ChannelService originalChannelService =
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, originalStatusDate, "userId");
+
+        doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
+        doReturn(1).when(jdbcTemplate).update(contains("insert into channel_service_history"),
+                (ChannelServiceHistoryPreparedStatementSetter) notNull());
+
+        channelServiceManager
+                .updateChannelServiceStatus(originalChannelService, Service.Status.INACTIVE, "updatingUser");
+
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
+                channelServiceUpdatePreparedStatementCreatorArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
+        ArgumentCaptor<ChannelServiceHistoryPreparedStatementSetter>
+                channelServiceHistoryPreparedStatementSetterArgumentCaptor =
+                ArgumentCaptor.forClass(ChannelServiceHistoryPreparedStatementSetter.class);
+        verify(jdbcTemplate, times(1)).update(channelServiceUpdatePreparedStatementCreatorArgumentCaptor.capture());
+        verify(jdbcTemplate, times(1)).update(contains("insert into channel_service_history"),
+                channelServiceHistoryPreparedStatementSetterArgumentCaptor.capture());
+        verify(channelServiceCache, times(1)).refresh(new ChannelServiceKey("channelId", "service"));
+
+        ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
+                channelServiceUpdatePreparedStatementCreatorArgumentCaptor.getValue();
+        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
+                channelServiceHistoryPreparedStatementSetterArgumentCaptor.getValue();
+
+        ChannelService channelService = channelServiceUpdatePreparedStatementCreator.getChannelService();
+        assertSame(originalChannelService, channelService, "The channel service updated does not match.");
+        assertEquals(Service.Status.INACTIVE, channelServiceUpdatePreparedStatementCreator.getChannelServiceStatus(),
+                "The new status does not match.");
+        assertEquals("updatingUser", channelServiceUpdatePreparedStatementCreator.getUpdatingUser(),
+                "The updating user should have been null.");
+        assertNotEquals(channelService.getUserId(), channelServiceUpdatePreparedStatementCreator.getUpdatingUser(),
+                "The original user and the update user should not match.");
+
+        LocalDateTime updatedChannelServiceStatusDate =
+                channelServiceUpdatePreparedStatementCreator.getChannelServiceStatusDate();
+        ChannelServiceHistory channelServiceHistory =
+                channelServiceHistoryPreparedStatementSetter.getChannelServiceHistory();
+        assertEquals(originalStatusDate, channelServiceHistory.getBeginDate(),
+                "The history status begin date does not match.");
+        assertEquals(updatedChannelServiceStatusDate, channelServiceHistory.getEndDate(),
+                "The history status end date does not match.");
     }
 
 }

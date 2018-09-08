@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,7 +100,8 @@ class ChannelServiceDaoTest {
         doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
         assertTrue(
-                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
+                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
+                        LocalDateTime.now(), "updatingUser"));
 
         ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
                 channelServiceUpdatePreparedStatementCreatorCaptor =
@@ -118,12 +120,14 @@ class ChannelServiceDaoTest {
 
     @Test
     void updateChannelServiceStatusWithoutUpdatingUserId() {
-        ChannelService channelService =
-                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
+        ChannelService channelService = new ChannelService("channelId", "service", Service.Status.ACTIVE,
+                LocalDateTime.now().minus(5, ChronoUnit.HOURS), "userId");
 
         doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertTrue(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.DISABLED, null));
+        LocalDateTime channelServiceStatusDate = LocalDateTime.now();
+        assertTrue(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.DISABLED,
+                channelServiceStatusDate, null));
 
         ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
                 channelServiceUpdatePreparedStatementCreatorCaptor =
@@ -136,6 +140,9 @@ class ChannelServiceDaoTest {
                 "The channel service to update does not match.");
         assertEquals(Service.Status.DISABLED, channelServiceUpdatePreparedStatementCreator.getChannelServiceStatus(),
                 "The new channel service status does not match.");
+        assertEquals(channelServiceStatusDate,
+                channelServiceUpdatePreparedStatementCreator.getChannelServiceStatusDate(),
+                "The new channel service status date does not match.");
         assertNull(channelServiceUpdatePreparedStatementCreator.getUpdatingUser(),
                 "The updating user id should be null.");
     }
@@ -147,8 +154,8 @@ class ChannelServiceDaoTest {
 
         doReturn(0).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertFalse(
-                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
+        assertFalse(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
+                        LocalDateTime.now(), "updatingUser"));
     }
 
     @Test
@@ -159,7 +166,7 @@ class ChannelServiceDaoTest {
         doReturn(2).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
         assertThrows(IncorrectUpdateSemanticsDataAccessException.class, () -> channelServiceDao
-                .updateChannelServiceStatus(channelService, Service.Status.INACTIVE, "updatingUser"));
+                .updateChannelServiceStatus(channelService, Service.Status.INACTIVE, LocalDateTime.now(), "updatingUser"));
     }
 
     @Test

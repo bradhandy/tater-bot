@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelServiceUpdatePreparedStatementCreatorTest {
@@ -32,22 +33,25 @@ class ChannelServiceUpdatePreparedStatementCreatorTest {
     void createPreparedStatementForChannelServiceWithoutUserId() throws SQLException {
         doReturn(preparedStatement).when(connection).prepareStatement(contains("user_id is null"));
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(5, ChronoUnit.DAYS);
+        LocalDateTime updatedStatusDate = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.INACTIVE,
-                currentDateTime, null);
+                originalStatusDate, null);
         ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
-                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.ACTIVE, "updatingUser");
+                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.ACTIVE,
+                        updatedStatusDate, "updatingUser");
 
         PreparedStatement createdPreparedStatement =
                 channelServiceUpdatePreparedStatementCreator.createPreparedStatement(connection);
         assertSame(preparedStatement, createdPreparedStatement, "The prepared statement does not match.");
 
         verify(preparedStatement, times(1)).setString(1, "active");
-        verify(preparedStatement, times(1)).setString(2, "updatingUser");
-        verify(preparedStatement, times(1)).setString(3, "channelId");
-        verify(preparedStatement, times(1)).setString(4, "service");
-        verify(preparedStatement, times(1)).setString(5, "inactive");
-        verify(preparedStatement, times(1)).setTimestamp(6, Timestamp.valueOf(currentDateTime));
+        verify(preparedStatement, times(1)).setTimestamp(2, Timestamp.valueOf(updatedStatusDate));
+        verify(preparedStatement, times(1)).setString(3, "updatingUser");
+        verify(preparedStatement, times(1)).setString(4, "channelId");
+        verify(preparedStatement, times(1)).setString(5, "service");
+        verify(preparedStatement, times(1)).setString(6, "inactive");
+        verify(preparedStatement, times(1)).setTimestamp(7, Timestamp.valueOf(originalStatusDate));
         verifyNoMoreInteractions(preparedStatement);
     }
 
@@ -55,24 +59,26 @@ class ChannelServiceUpdatePreparedStatementCreatorTest {
     void createPreparedStatementForChannelServiceWithUserId() throws SQLException {
         doReturn(preparedStatement).when(connection).prepareStatement(contains("and user_id = ?"));
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(3, ChronoUnit.DAYS);
+        LocalDateTime updatedStatusDate = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.INACTIVE,
-                currentDateTime, "lastUpdatedUserId");
+                originalStatusDate, "lastUpdatedUserId");
         ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
                 new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.DISABLED,
-                        "updatingUser");
+                        updatedStatusDate, "updatingUser");
 
         PreparedStatement createdPreparedStatement =
                 channelServiceUpdatePreparedStatementCreator.createPreparedStatement(connection);
         assertSame(preparedStatement, createdPreparedStatement, "The prepared statement does not match.");
 
         verify(preparedStatement, times(1)).setString(1, "disabled");
-        verify(preparedStatement, times(1)).setString(2, "updatingUser");
-        verify(preparedStatement, times(1)).setString(3, "channelId");
-        verify(preparedStatement, times(1)).setString(4, "service");
-        verify(preparedStatement, times(1)).setString(5, "inactive");
-        verify(preparedStatement, times(1)).setTimestamp(6, Timestamp.valueOf(currentDateTime));
-        verify(preparedStatement, times(1)).setString(7, "lastUpdatedUserId");
+        verify(preparedStatement, times(1)).setTimestamp(2, Timestamp.valueOf(updatedStatusDate));
+        verify(preparedStatement, times(1)).setString(3, "updatingUser");
+        verify(preparedStatement, times(1)).setString(4, "channelId");
+        verify(preparedStatement, times(1)).setString(5, "service");
+        verify(preparedStatement, times(1)).setString(6, "inactive");
+        verify(preparedStatement, times(1)).setTimestamp(7, Timestamp.valueOf(originalStatusDate));
+        verify(preparedStatement, times(1)).setString(8, "lastUpdatedUserId");
         verifyNoMoreInteractions(preparedStatement);
     }
 
@@ -80,23 +86,26 @@ class ChannelServiceUpdatePreparedStatementCreatorTest {
     void createPreparedStatementForChannelServiceWhenUpdatingUserIdIsNull() throws SQLException {
         doReturn(preparedStatement).when(connection).prepareStatement(contains("and user_id = ?"));
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
+        LocalDateTime updatedStatusDate = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.DISABLED,
-                currentDateTime, "lastUpdatedUserId");
+                originalStatusDate, "lastUpdatedUserId");
         ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
-                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.INACTIVE);
+                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.INACTIVE,
+                        updatedStatusDate);
 
         PreparedStatement createdPreparedStatement =
                 channelServiceUpdatePreparedStatementCreator.createPreparedStatement(connection);
         assertSame(preparedStatement, createdPreparedStatement, "The prepared statement does not match.");
 
         verify(preparedStatement, times(1)).setString(1, "inactive");
-        verify(preparedStatement, times(1)).setNull(2, Types.VARCHAR);
-        verify(preparedStatement, times(1)).setString(3, "channelId");
-        verify(preparedStatement, times(1)).setString(4, "service");
-        verify(preparedStatement, times(1)).setString(5, "disabled");
-        verify(preparedStatement, times(1)).setTimestamp(6, Timestamp.valueOf(currentDateTime));
-        verify(preparedStatement, times(1)).setString(7, "lastUpdatedUserId");
+        verify(preparedStatement, times(1)).setTimestamp(2, Timestamp.valueOf(updatedStatusDate));
+        verify(preparedStatement, times(1)).setNull(3, Types.VARCHAR);
+        verify(preparedStatement, times(1)).setString(4, "channelId");
+        verify(preparedStatement, times(1)).setString(5, "service");
+        verify(preparedStatement, times(1)).setString(6, "disabled");
+        verify(preparedStatement, times(1)).setTimestamp(7, Timestamp.valueOf(originalStatusDate));
+        verify(preparedStatement, times(1)).setString(8, "lastUpdatedUserId");
         verifyNoMoreInteractions(preparedStatement);
     }
 
@@ -104,23 +113,26 @@ class ChannelServiceUpdatePreparedStatementCreatorTest {
     void createPreparedStatementForChannelServiceWhenUpdatingUserIdIsEmpty() throws SQLException {
         doReturn(preparedStatement).when(connection).prepareStatement(contains("and user_id = ?"));
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime originalStatusDate = LocalDateTime.now().minus(2, ChronoUnit.MINUTES);
+        LocalDateTime updatedStatusDate = LocalDateTime.now();
         ChannelService channelService = new ChannelService("channelId", "service", Service.Status.INACTIVE,
-                currentDateTime, "lastUpdatedUserId");
+                originalStatusDate, "lastUpdatedUserId");
         ChannelServiceUpdatePreparedStatementCreator channelServiceUpdatePreparedStatementCreator =
-                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.ACTIVE, "");
+                new ChannelServiceUpdatePreparedStatementCreator(channelService, Service.Status.ACTIVE,
+                        updatedStatusDate, "");
 
         PreparedStatement createdPreparedStatement =
                 channelServiceUpdatePreparedStatementCreator.createPreparedStatement(connection);
         assertSame(preparedStatement, createdPreparedStatement, "The prepared statement does not match.");
 
         verify(preparedStatement, times(1)).setString(1, "active");
-        verify(preparedStatement, times(1)).setNull(2, Types.VARCHAR);
-        verify(preparedStatement, times(1)).setString(3, "channelId");
-        verify(preparedStatement, times(1)).setString(4, "service");
-        verify(preparedStatement, times(1)).setString(5, "inactive");
-        verify(preparedStatement, times(1)).setTimestamp(6, Timestamp.valueOf(currentDateTime));
-        verify(preparedStatement, times(1)).setString(7, "lastUpdatedUserId");
+        verify(preparedStatement, times(1)).setTimestamp(2, Timestamp.valueOf(updatedStatusDate));
+        verify(preparedStatement, times(1)).setNull(3, Types.VARCHAR);
+        verify(preparedStatement, times(1)).setString(4, "channelId");
+        verify(preparedStatement, times(1)).setString(5, "service");
+        verify(preparedStatement, times(1)).setString(6, "inactive");
+        verify(preparedStatement, times(1)).setTimestamp(7, Timestamp.valueOf(originalStatusDate));
+        verify(preparedStatement, times(1)).setString(8, "lastUpdatedUserId");
         verifyNoMoreInteractions(preparedStatement);
     }
 

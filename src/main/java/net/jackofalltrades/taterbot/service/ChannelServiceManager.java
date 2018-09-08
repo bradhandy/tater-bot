@@ -48,4 +48,21 @@ public class ChannelServiceManager {
         }
     }
 
+    public void updateChannelServiceStatus(ChannelService channelService, Service.Status channelServiceStatus,
+            String updatingUser) {
+        LocalDateTime channelServiceStatusDate = LocalDateTime.now();
+        if (channelServiceDao.updateChannelServiceStatus(channelService, channelServiceStatus, channelServiceStatusDate,
+                updatingUser)) {
+            ChannelServiceHistory channelServiceHistory = createChannelServiceHistory(channelService, channelServiceStatusDate);
+            channelServiceHistoryDao.insertChannelServiceHistory(channelServiceHistory);
+            channelServiceCache
+                    .refresh(new ChannelServiceKey(channelService.getChannelId(), channelService.getServiceCode()));
+        }
+    }
+
+    private ChannelServiceHistory createChannelServiceHistory(ChannelService channelService,
+            LocalDateTime endDateTime) {
+        return new ChannelServiceHistory(channelService.getChannelId(), channelService.getServiceCode(),
+                channelService.getStatus(), channelService.getStatusDate(), endDateTime, channelService.getUserId());
+    }
 }

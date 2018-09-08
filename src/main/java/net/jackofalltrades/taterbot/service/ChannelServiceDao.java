@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -38,9 +39,9 @@ class ChannelServiceDao {
     }
 
     boolean updateChannelServiceStatus(ChannelService channelService, Service.Status channelServiceStatus,
-            String updatingUser) {
+            LocalDateTime channelServiceStatusDate, String updatingUser) {
         int recordsUpdated = jdbcTemplate.update(new ChannelServiceUpdatePreparedStatementCreator(channelService,
-                channelServiceStatus, updatingUser));
+                channelServiceStatus, channelServiceStatusDate, updatingUser));
         if (recordsUpdated > 1) {
             throw new IncorrectUpdateSemanticsDataAccessException(
                     String.format("Expected to update 1 channel service record, but updated %d records.",

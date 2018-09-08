@@ -7,29 +7,33 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 
 class ChannelServiceUpdatePreparedStatementCreator implements PreparedStatementCreator {
 
     private static final String UPDATE_WITH_UPDATE_USER_ID =
-            "update channel_service set status = ?, user_id = ? " +
+            "update channel_service set status = ?, status_date = ?, user_id = ? " +
                     "where channel_id = ? and service_code = ? and status = ? and status_date = ? and user_id = ?";
     private static final String UPDATE_WITHOUT_UPDATE_USER_ID =
-            "update channel_service set status = ?, user_id = ? " +
+            "update channel_service set status = ?, status_date = ?, user_id = ? " +
                     "where channel_id = ? and service_code = ? and status = ? and status_date = ? and user_id is null";
 
     private final ChannelService channelService;
     private final Service.Status channelServiceStatus;
+    private final LocalDateTime channelServiceStatusDate;
     private final String updatingUser;
 
     ChannelServiceUpdatePreparedStatementCreator(ChannelService channelService, Service.Status channelServiceStatus,
-            String updatingUser) {
+            LocalDateTime channelServiceStatusDate, String updatingUser) {
         this.channelService = channelService;
         this.channelServiceStatus = channelServiceStatus;
+        this.channelServiceStatusDate = channelServiceStatusDate;
         this.updatingUser = updatingUser;
     }
 
-    ChannelServiceUpdatePreparedStatementCreator(ChannelService channelService, Service.Status channelServiceStatus) {
-        this(channelService, channelServiceStatus, null);
+    ChannelServiceUpdatePreparedStatementCreator(ChannelService channelService, Service.Status channelServiceStatus,
+            LocalDateTime channelServiceStatusDate) {
+        this(channelService, channelServiceStatus, channelServiceStatusDate, null);
     }
 
     @Override
@@ -39,21 +43,22 @@ class ChannelServiceUpdatePreparedStatementCreator implements PreparedStatementC
             preparedStatement = connection.prepareStatement(UPDATE_WITHOUT_UPDATE_USER_ID);
         } else {
             preparedStatement = connection.prepareStatement(UPDATE_WITH_UPDATE_USER_ID);
-            preparedStatement.setString(7, channelService.getUserId());
+            preparedStatement.setString(8, channelService.getUserId());
         }
 
         preparedStatement.setString(1, channelServiceStatus.name().toLowerCase());
+        preparedStatement.setTimestamp(2, Timestamp.valueOf(channelServiceStatusDate));
 
         if (Strings.isNullOrEmpty(updatingUser)) {
-            preparedStatement.setNull(2, Types.VARCHAR);
+            preparedStatement.setNull(3, Types.VARCHAR);
         } else {
-            preparedStatement.setString(2, updatingUser);
+            preparedStatement.setString(3, updatingUser);
         }
 
-        preparedStatement.setString(3, channelService.getChannelId());
-        preparedStatement.setString(4, channelService.getServiceCode());
-        preparedStatement.setString(5, channelService.getStatus().name().toLowerCase());
-        preparedStatement.setTimestamp(6, Timestamp.valueOf(channelService.getStatusDate()));
+        preparedStatement.setString(4, channelService.getChannelId());
+        preparedStatement.setString(5, channelService.getServiceCode());
+        preparedStatement.setString(6, channelService.getStatus().name().toLowerCase());
+        preparedStatement.setTimestamp(7, Timestamp.valueOf(channelService.getStatusDate()));
 
         return preparedStatement;
     }
@@ -64,6 +69,10 @@ class ChannelServiceUpdatePreparedStatementCreator implements PreparedStatementC
 
     Service.Status getChannelServiceStatus() {
         return channelServiceStatus;
+    }
+
+    LocalDateTime getChannelServiceStatusDate() {
+        return channelServiceStatusDate;
     }
 
     String getUpdatingUser() {
