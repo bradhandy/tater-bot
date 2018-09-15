@@ -2,7 +2,6 @@ package net.jackofalltrades.taterbot.service;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doReturn;

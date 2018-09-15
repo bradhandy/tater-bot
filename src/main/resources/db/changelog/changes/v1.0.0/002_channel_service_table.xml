@@ -9,7 +9,7 @@
             </column>
             <column name="service_code" type="varchar(32)">
                 <constraints nullable="false"
-                        foreignKeyName="cs_service_code_fk" deleteCascade="true"
+                        foreignKeyName="cs_service_fk" deleteCascade="true"
                         referencedTableName="service" referencedColumnNames="code" />
             </column>
             <column name="status" type="varchar(10)">
@@ -21,8 +21,11 @@
             <column name="user_id" type="varchar(256)" />
         </createTable>
 
+        <!-- PostgreSQL automatically creates a unique index when a unique constraint is created. -->
+        <addUniqueConstraint tableName="channel_service" columnNames="channel_id,service_code"
+                constraintName="channel_service_pk" />
+
         <rollback>
-            <dropForeignKeyConstraint baseTableName="channel_service" constraintName="cs_service_code_fk" />
             <dropTable tableName="channel_service" />
         </rollback>
     </changeSet>
@@ -49,11 +52,15 @@
         
         <addForeignKeyConstraint
                 baseTableName="channel_service_history" baseColumnNames="channel_id,service_code"
-                constraintName="channel_service_fk" deleteCascade="true"
+                constraintName="csh_channel_service_fk" deleteCascade="true"
                 referencedTableName="channel_service" referencedColumnNames="channel_id,service_code" />
 
+        <createIndex tableName="channel_service_history" indexName="channel_service_history_fk_idx">
+            <column name="channel_id" />
+            <column name="service_code" />
+        </createIndex>
+
         <rollback>
-            <dropForeignKeyConstraint baseTableName="channel_service_history" constraintName="channel_service_fk" />
             <dropTable tableName="channel_service_history" />
         </rollback>
     </changeSet>

@@ -1,0 +1,66 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="create-channel-table" author="bradHandy" dbms="h2,postgresql">
+        <createTable tableName="channel">
+            <column name="channel_id" type="varchar(256)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="channel_pk" />
+            </column>
+            <column name="name" type="varchar(256)">
+                <constraints nullable="true" />
+            </column>
+            <column name="member" type="char(1)" defaultValue="N">
+                <constraints nullable="false" />
+            </column>
+            <column name="member_reason" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="begin_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        
+        <rollback>
+            <dropTable tableName="channel" />
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="create-channel-history-table" author="bhandy" dbms="h2,postgresql">
+        <createTable tableName="channel_history">
+            <column name="channel_id" type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="name" type="varchar(256)">
+                <constraints nullable="true" />
+            </column>
+            <column name="member" type="char(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="member_reason" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="begin_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+            <column name="end_date" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="channel_history" baseColumnNames="channel_id"
+                                 constraintName="ch_channel_fk"
+                                 referencedTableName="channel" referencedColumnNames="channel_id" />
+        
+        <createIndex tableName="channel_history" indexName="channel_history_idx1">
+            <column name="channel_id" />
+            <column name="begin_date" />
+            <column name="end_date" />
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="channel_history" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

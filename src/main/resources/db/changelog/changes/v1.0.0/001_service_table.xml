@@ -32,7 +32,7 @@
         <createTable tableName="service_history">
             <column name="code" type="varchar(32)">
                 <constraints nullable="false"
-                             foreignKeyName="sh_service_code_fk" deleteCascade="true"
+                             foreignKeyName="sh_service_fk" deleteCascade="true"
                              referencedTableName="service" referencedColumnNames="code" />
             </column>
             <column name="description" type="varchar(256)">
@@ -59,7 +59,6 @@
         </createIndex>
 
         <rollback>
-            <dropForeignKeyConstraint baseTableName="service_history" constraintName="sh_service_code_fk" />
             <dropTable tableName="service_history" />
         </rollback>
     </changeSet>

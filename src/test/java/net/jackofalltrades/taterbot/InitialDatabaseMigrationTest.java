@@ -1,10 +1,16 @@
 package net.jackofalltrades.taterbot;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import net.jackofalltrades.taterbot.service.ChannelService;
+import net.jackofalltrades.taterbot.service.ChannelServiceKey;
+import net.jackofalltrades.taterbot.service.ChannelServiceManager;
 import net.jackofalltrades.taterbot.service.Service;
 import net.jackofalltrades.taterbot.service.ServiceManager;
 import org.junit.Test;
@@ -18,6 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -28,13 +35,27 @@ import java.util.Map;
 public class InitialDatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =
-            ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC").put("SERVICE_HISTORY", "PUBLIC")
-                    .put("CHANNEL_SERVICE", "PUBLIC").put("CHANNEL_SERVICE_HISTORY", "PUBLIC")
-                    .put("DATABASECHANGELOG", "PUBLIC").put("DATABASECHANGELOGLOCK", "PUBLIC").build();
+            ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC")
+                    .put("SERVICE_HISTORY", "PUBLIC")
+                    .put("CHANNEL_SERVICE", "PUBLIC")
+                    .put("CHANNEL_SERVICE_HISTORY", "PUBLIC")
+                    .put("CHANNEL", "PUBLIC")
+                    .put("CHANNEL_HISTORY", "PUBLIC")
+                    .put("ADMIN", "PUBLIC")
+                    .put("ADMIN_HISTORY", "PUBLIC")
+                    .put("CHANNEL_ADMIN", "PUBLIC")
+                    .put("CHANNEL_ADMIN_HISTORY", "PUBLIC")
+                    .put("DATABASECHANGELOG", "PUBLIC")
+                    .put("DATABASECHANGELOGLOCK", "PUBLIC").build();
 
-    @Autowired private JdbcTemplate testDatabaseTemplate;
+    @Autowired
+    private JdbcTemplate testDatabaseTemplate;
 
-    @Autowired private ServiceManager serviceManager;
+    @Autowired
+    private ServiceManager serviceManager;
+
+    @Autowired
+    private ChannelServiceManager channelServceManager;
 
     @Test
     public void databaseTablesCreatedSuccessfully() {
@@ -56,12 +77,6 @@ public class InitialDatabaseMigrationTest {
     public void serviceTableFunctionalityWorksCorrectly() {
         recordServiceCreatedSuccessfully();
         updatingRecordStatusCreatesHistoryRecord();
-    }
-
-    @Test
-    public void missingServiceReturnsUnknownService() {
-        assertSame("The service does not match.", Service.UNKNOWN_SERVICE,
-                serviceManager.findServiceByCode("notthere"));
     }
 
     private void recordServiceCreatedSuccessfully() {
@@ -105,6 +120,77 @@ public class InitialDatabaseMigrationTest {
                             updatedService.getStatusDate(), historyEndDate);
                 },
                 Service.RECORD_SERVICE_CODE);
+    }
+
+    @Test
+    public void missingServiceReturnsUnknownService() {
+        assertSame("The service does not match.", Service.UNKNOWN_SERVICE,
+                serviceManager.findServiceByCode("notthere"));
+    }
+
+    @Test
+    public void channelServiceFunctionalityWorksCorrectly() {
+        addMissingServicesToChannel();
+        updateRecordStatusToDisabled();
+    }
+
+    private void addMissingServicesToChannel() {
+        ChannelService recordChannelService = new ChannelService("channelId", "record", Service.Status.INACTIVE,
+                LocalDateTime.now(), null);
+        Map<String, ChannelService> expectedChannelServicesMap = Maps.newHashMap();
+        expectedChannelServicesMap.put("record", recordChannelService);
+
+        assertFalse("The channel service should not be present.",
+                channelServceManager.findChannelServiceByKey(new ChannelServiceKey("channelId", "record")).isPresent());
+
+        channelServceManager.addMissingServicesToChannel("channelId");
+
+        testDatabaseTemplate.query("select * from channel_service where channel_id = ?",
+                preparedStatement -> {
+                    preparedStatement.setString(1, "channelId");
+                },
+                resultSet -> {
+                    ChannelService channelService = expectedChannelServicesMap.remove(resultSet.getString("service_code"));
+                    if (channelService != null) {
+                        assertEquals("The channel id does not match.",
+                                channelService.getChannelId(), resultSet.getString("channel_id"));
+                        assertEquals("The service code does not match.",
+                                channelService.getServiceCode(), resultSet.getString("service_code"));
+                        assertEquals("The status does not match.", "inactive", resultSet.getString("status"));
+                    }
+                });
+        assertTrue("Missing validation of some required services.", expectedChannelServicesMap.isEmpty());
+    }
+
+    private void updateRecordStatusToDisabled() {
+        ChannelServiceKey channelServiceKey = new ChannelServiceKey("channelId", "record");
+        Optional<ChannelService> channelService = channelServceManager.findChannelServiceByKey(channelServiceKey);
+        assertTrue("There should have been a record service for channelId.", channelService.isPresent());
+
+        channelServceManager.updateChannelServiceStatus(channelService.get(), Service.Status.DISABLED, "bradhandy");
+
+        Optional<ChannelService> updatedChannelService =
+                channelServceManager.findChannelServiceByKey(channelServiceKey);
+        assertTrue("There should have been a record service updated for channelId.", updatedChannelService.isPresent());
+
+        assertEquals("The status should have been disabled.", Service.Status.DISABLED,
+                updatedChannelService.get().getStatus());
+        assertTrue("The original status date should be on or before the updated status date.",
+                !channelService.get().getStatusDate().isAfter(updatedChannelService.get().getStatusDate()));
+
+        @SuppressWarnings("ConstantConditions")
+        int numberOfHistoryRecords = testDatabaseTemplate.query(
+                "select count(*) numHistory from channel_service_history where channel_id = ? and service_code = ? " +
+                        "and status = ? and begin_date = ? and end_date = ?",
+                preparedStatement -> {
+                        preparedStatement.setString(1, "channelId");
+                        preparedStatement.setString(2, "record");
+                        preparedStatement.setString(3, "inactive");
+                        preparedStatement.setTimestamp(4, Timestamp.valueOf(channelService.get().getStatusDate()));
+                        preparedStatement.setTimestamp(5, Timestamp.valueOf(updatedChannelService.get().getStatusDate()));
+                    },
+                resultSet -> resultSet.next() ? resultSet.getInt("numHistory") : 0);
+        assertEquals("There should be one history record.", 1, numberOfHistoryRecords);
     }
 
     @Configuration

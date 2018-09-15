@@ -3,8 +3,11 @@ package net.jackofalltrades.taterbot.service;
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import net.jackofalltrades.taterbot.event.JoinEventTask;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,6 +40,7 @@ public class ChannelServiceManager {
         }
     }
 
+    @JoinEventTask
     public void addMissingServicesToChannel(String channelId) {
         List<String> missingServiceCodes = channelServiceDao.findMissingServicesForChannel(channelId);
         for (String missingServiceCode : missingServiceCodes) {
@@ -48,6 +52,7 @@ public class ChannelServiceManager {
         }
     }
 
+    @Transactional(rollbackFor = IncorrectUpdateSemanticsDataAccessException.class)
     public void updateChannelServiceStatus(ChannelService channelService, Service.Status channelServiceStatus,
             String updatingUser) {
         LocalDateTime channelServiceStatusDate = LocalDateTime.now();
@@ -65,4 +70,5 @@ public class ChannelServiceManager {
         return new ChannelServiceHistory(channelService.getChannelId(), channelService.getServiceCode(),
                 channelService.getStatus(), channelService.getStatusDate(), endDateTime, channelService.getUserId());
     }
+
 }
