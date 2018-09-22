@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @ExtendWith(MockitoExtension.class)
-class ChannelServiceHistoryPreparedStatementSetterTest {
+class ChannelServiceHistoryInsertPreparedStatementSetterTest {
 
     @Mock
     private PreparedStatement preparedStatement;
@@ -28,10 +28,10 @@ class ChannelServiceHistoryPreparedStatementSetterTest {
         ChannelServiceHistory channelServiceHistory = new ChannelServiceHistory("channelId", "service",
                 Service.Status.ACTIVE, beginDate, endDate, "userId");
 
-        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
-                new ChannelServiceHistoryPreparedStatementSetter(channelServiceHistory);
+        ChannelServiceHistoryInsertPreparedStatementSetter channelServiceHistoryInsertPreparedStatementSetter =
+                new ChannelServiceHistoryInsertPreparedStatementSetter(channelServiceHistory);
 
-        channelServiceHistoryPreparedStatementSetter.setValues(preparedStatement);
+        channelServiceHistoryInsertPreparedStatementSetter.setValues(preparedStatement);
 
         verify(preparedStatement, times(1)).setString(1, "channelId");
         verify(preparedStatement, times(1)).setString(2, "service");
@@ -40,7 +40,7 @@ class ChannelServiceHistoryPreparedStatementSetterTest {
         verify(preparedStatement, times(1)).setTimestamp(5, Timestamp.valueOf(endDate));
         verify(preparedStatement, times(1)).setString(6, "userId");
 
-        assertSame(channelServiceHistory, channelServiceHistoryPreparedStatementSetter.getChannelServiceHistory(),
+        assertSame(channelServiceHistory, channelServiceHistoryInsertPreparedStatementSetter.getChannelServiceHistory(),
                 "The channel service history does not match.");
     }
 
@@ -51,10 +51,10 @@ class ChannelServiceHistoryPreparedStatementSetterTest {
         ChannelServiceHistory channelServiceHistory = new ChannelServiceHistory("channelId", "service",
                 Service.Status.ACTIVE, beginDate, endDate, null);
 
-        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
-                new ChannelServiceHistoryPreparedStatementSetter(channelServiceHistory);
+        ChannelServiceHistoryInsertPreparedStatementSetter channelServiceHistoryInsertPreparedStatementSetter =
+                new ChannelServiceHistoryInsertPreparedStatementSetter(channelServiceHistory);
 
-        channelServiceHistoryPreparedStatementSetter.setValues(preparedStatement);
+        channelServiceHistoryInsertPreparedStatementSetter.setValues(preparedStatement);
 
         verify(preparedStatement, times(1)).setString(1, "channelId");
         verify(preparedStatement, times(1)).setString(2, "service");
@@ -71,10 +71,10 @@ class ChannelServiceHistoryPreparedStatementSetterTest {
         ChannelServiceHistory channelServiceHistory = new ChannelServiceHistory("channelId", "service",
                 Service.Status.ACTIVE, beginDate, endDate, "");
 
-        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
-                new ChannelServiceHistoryPreparedStatementSetter(channelServiceHistory);
+        ChannelServiceHistoryInsertPreparedStatementSetter channelServiceHistoryInsertPreparedStatementSetter =
+                new ChannelServiceHistoryInsertPreparedStatementSetter(channelServiceHistory);
 
-        channelServiceHistoryPreparedStatementSetter.setValues(preparedStatement);
+        channelServiceHistoryInsertPreparedStatementSetter.setValues(preparedStatement);
 
         verify(preparedStatement, times(1)).setString(1, "channelId");
         verify(preparedStatement, times(1)).setString(2, "service");

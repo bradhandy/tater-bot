@@ -34,7 +34,7 @@ class ChannelServiceDao {
 
         if (recordsInserted != 1) {
             throw new IncorrectUpdateSemanticsDataAccessException(
-                    String.format("Expected to insert 1 channe service record, but inserted %d.", recordsInserted));
+                    String.format("Expected to insert 1 channel service record, but inserted %d.", recordsInserted));
         }
     }
 

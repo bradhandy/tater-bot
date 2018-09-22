@@ -41,6 +41,7 @@ public class ChannelServiceManager {
     }
 
     @JoinEventTask
+    @Transactional(rollbackFor = IncorrectUpdateSemanticsDataAccessException.class)
     public void addMissingServicesToChannel(String channelId) {
         List<String> missingServiceCodes = channelServiceDao.findMissingServicesForChannel(channelId);
         for (String missingServiceCode : missingServiceCodes) {

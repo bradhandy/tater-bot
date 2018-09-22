@@ -7,11 +7,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-class ChannelServiceHistoryPreparedStatementSetter implements PreparedStatementSetter {
+class ChannelServiceHistoryInsertPreparedStatementSetter implements PreparedStatementSetter {
 
     private final ChannelServiceHistory channelServiceHistory;
 
-    public ChannelServiceHistoryPreparedStatementSetter(ChannelServiceHistory channelServiceHistory) {
+    public ChannelServiceHistoryInsertPreparedStatementSetter(ChannelServiceHistory channelServiceHistory) {
         this.channelServiceHistory = channelServiceHistory;
     }
 

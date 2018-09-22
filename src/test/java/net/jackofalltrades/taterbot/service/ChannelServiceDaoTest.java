@@ -99,12 +99,10 @@ class ChannelServiceDaoTest {
 
         doReturn(1).when(jdbcTemplate).update((ChannelServiceUpdatePreparedStatementCreator) notNull());
 
-        assertTrue(
-                channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
+        assertTrue(channelServiceDao.updateChannelServiceStatus(channelService, Service.Status.INACTIVE,
                         LocalDateTime.now(), "updatingUser"));
 
-        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator>
-                channelServiceUpdatePreparedStatementCreatorCaptor =
+        ArgumentCaptor<ChannelServiceUpdatePreparedStatementCreator> channelServiceUpdatePreparedStatementCreatorCaptor =
                 ArgumentCaptor.forClass(ChannelServiceUpdatePreparedStatementCreator.class);
         verify(jdbcTemplate, times(1)).update(channelServiceUpdatePreparedStatementCreatorCaptor.capture());
 

@@ -42,25 +42,25 @@ class ChannelServiceHistoryDaoTest {
     @Test
     void insertChannelServiceHistorySucceeds() {
         doReturn(1).when(jdbcTemplate).update(contains("insert into channel_service_history"),
-                (ChannelServiceHistoryPreparedStatementSetter) notNull());
+                (ChannelServiceHistoryInsertPreparedStatementSetter) notNull());
 
         channelServiceHistoryDao.insertChannelServiceHistory(channelServiceHistory);
 
-        ArgumentCaptor<ChannelServiceHistoryPreparedStatementSetter> channelServiceHistoryPreparedStatementSetterCaptor =
-                ArgumentCaptor.forClass(ChannelServiceHistoryPreparedStatementSetter.class);
+        ArgumentCaptor<ChannelServiceHistoryInsertPreparedStatementSetter> channelServiceHistoryPreparedStatementSetterCaptor =
+                ArgumentCaptor.forClass(ChannelServiceHistoryInsertPreparedStatementSetter.class);
         verify(jdbcTemplate, times(1)).update(contains("insert into channel_service_history"),
                 channelServiceHistoryPreparedStatementSetterCaptor.capture());
 
-        ChannelServiceHistoryPreparedStatementSetter channelServiceHistoryPreparedStatementSetter =
+        ChannelServiceHistoryInsertPreparedStatementSetter channelServiceHistoryInsertPreparedStatementSetter =
                 channelServiceHistoryPreparedStatementSetterCaptor.getValue();
-        assertSame(channelServiceHistory, channelServiceHistoryPreparedStatementSetter.getChannelServiceHistory(),
+        assertSame(channelServiceHistory, channelServiceHistoryInsertPreparedStatementSetter.getChannelServiceHistory(),
                 "THe channel service history does not match.");
     }
 
     @Test
     void insertChannelServiceHistoryFails() {
         doReturn(0).when(jdbcTemplate).update(contains("insert into channel_service_history"),
-                (ChannelServiceHistoryPreparedStatementSetter) notNull());
+                (ChannelServiceHistoryInsertPreparedStatementSetter) notNull());
 
         assertThrows(IncorrectUpdateSemanticsDataAccessException.class,
                 () -> channelServiceHistoryDao.insertChannelServiceHistory(channelServiceHistory));

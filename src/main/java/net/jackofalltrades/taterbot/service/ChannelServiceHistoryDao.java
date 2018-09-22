@@ -19,7 +19,7 @@ class ChannelServiceHistoryDao {
         int recordsInserted = jdbcTemplate.update(
                 "insert into channel_service_history (channel_id, service_code, status, begin_date, end_date, user_id) "
                         + "values (?, ?, ?, ?, ?, ?)",
-                new ChannelServiceHistoryPreparedStatementSetter(channelServiceHistory));
+                new ChannelServiceHistoryInsertPreparedStatementSetter(channelServiceHistory));
 
         if (recordsInserted != 1) {
             throw new IncorrectUpdateSemanticsDataAccessException(

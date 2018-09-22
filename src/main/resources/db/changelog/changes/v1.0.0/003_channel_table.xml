@@ -7,16 +7,13 @@
             <column name="channel_id" type="varchar(256)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="channel_pk" />
             </column>
-            <column name="name" type="varchar(256)">
-                <constraints nullable="true" />
-            </column>
             <column name="member" type="char(1)" defaultValue="N">
                 <constraints nullable="false" />
             </column>
             <column name="member_reason" type="varchar(10)">
                 <constraints nullable="false" />
             </column>
-            <column name="begin_date" type="timestamp with time zone">
+            <column name="membership_date" type="timestamp with time zone">
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -30,9 +27,6 @@
         <createTable tableName="channel_history">
             <column name="channel_id" type="varchar(256)">
                 <constraints nullable="false" />
-            </column>
-            <column name="name" type="varchar(256)">
-                <constraints nullable="true" />
             </column>
             <column name="member" type="char(1)">
                 <constraints nullable="false" />
