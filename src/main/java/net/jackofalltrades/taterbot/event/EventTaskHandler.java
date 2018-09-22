@@ -14,7 +14,6 @@ import java.util.Arrays;
  *
  * @author bhandy
  */
-// @todo refactor this handle any event type.
 class EventTaskHandler {
 
     private final Class<? extends Event> eventType;
