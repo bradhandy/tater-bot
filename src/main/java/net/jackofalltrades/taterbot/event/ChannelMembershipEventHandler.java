@@ -1,5 +1,6 @@
 package net.jackofalltrades.taterbot.event;
 
+import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.JoinEvent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.event.source.RoomSource;
@@ -11,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /**
- * Executes actions annotated with @JoinEventTask when a JoinEvent is processed.
+ * Executes actions annotated with @EventTask when a JoinEvent is processed.
  *
  * @author bhandy
  */
@@ -19,21 +20,26 @@ import java.util.List;
 public class ChannelMembershipEventHandler {
 
     private final ChannelServiceManager channelServiceManager;
-    private final List<JoinEventTaskHandler> joinEventTaskHandlers;
+    private final List<EventTaskHandler> eventTaskHandlers;
 
     @Autowired
     public ChannelMembershipEventHandler(ChannelServiceManager channelServiceManager,
-            List<JoinEventTaskHandler> joinEventTaskHandlers) {
+            List<EventTaskHandler> eventTaskHandlers) {
         this.channelServiceManager = channelServiceManager;
-        this.joinEventTaskHandlers = joinEventTaskHandlers;
+        this.eventTaskHandlers = eventTaskHandlers;
     }
 
     @EventMapping
-    public void channelJoined(JoinEvent joinEvent) {
-        Source joinSource = joinEvent.getSource();
-        if (groupMembershipSource(joinSource)) {
-            for (JoinEventTaskHandler joinEventTaskHandler : joinEventTaskHandlers) {
-                joinEventTaskHandler.handleEvent(joinEvent);
+    public void channelJoined(JoinEvent event) {
+        handleEvent(event);
+    }
+
+    private void handleEvent(Event event) {
+        if (groupMembershipSource(event.getSource())) {
+            for (EventTaskHandler eventTaskHandler : eventTaskHandlers) {
+                if (eventTaskHandler.supports(event)) {
+                    eventTaskHandler.handleEvent(event);
+                }
             }
         }
     }

@@ -1,6 +1,8 @@
 package net.jackofalltrades.taterbot.event;
 
+import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.JoinEvent;
+import com.linecorp.bot.model.event.LeaveEvent;
 import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -8,28 +10,28 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Invokes a method annotated with @JoinEventTask on the bean configured within Spring.
+ * Invokes a method annotated with @EventTask on the bean configured within Spring.
  *
  * @author bhandy
  */
 // @todo refactor this handle any event type.
-class JoinEventTaskHandler {
+class EventTaskHandler {
 
+    private final Class<? extends Event> eventType;
     private final Object bean;
     private final Method method;
     private final ReflectionArgumentsSupplierFactory<?> reflectionArgumentsSupplierFactory;
 
-    private boolean valid;
-
-    public JoinEventTaskHandler(Object bean, Method method) {
+    EventTaskHandler(Class<? extends Event> eventType, Object bean, Method method) {
+        this.eventType = eventType;
         this.bean = bean;
         this.method = method;
-        this.reflectionArgumentsSupplierFactory = new JoinEventTaskReflectionArgumentsSupplierFactory<>(method);
+        this.reflectionArgumentsSupplierFactory = new EventTaskReflectionArgumentsSupplierFactory<>(method);
     }
 
-    public void handleEvent(JoinEvent joinEvent) {
+    void handleEvent(Event event) {
         ReflectionArgumentsSupplier<?> reflectionArgumentsSupplier =
-                reflectionArgumentsSupplierFactory.createReflectionArgumentsSupplier(joinEvent);
+                reflectionArgumentsSupplierFactory.createReflectionArgumentsSupplier(event);
         try {
             method.invoke(bean, reflectionArgumentsSupplier.get());
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -37,20 +39,25 @@ class JoinEventTaskHandler {
         }
     }
 
-    private static class JoinEventTaskReflectionArgumentsSupplierFactory<T> implements ReflectionArgumentsSupplierFactory<T> {
+    boolean supports(Event event) {
+        return eventType.isInstance(event);
+    }
+
+    private static class EventTaskReflectionArgumentsSupplierFactory<T> implements ReflectionArgumentsSupplierFactory<T> {
 
         private final ReflectionArgumentsSupplierType reflectionArgumentsSupplierType;
         private final Constructor<? extends ReflectionArgumentsSupplier<?>> reflectionArgumentsSupplierTypeConstructor;
 
-        private JoinEventTaskReflectionArgumentsSupplierFactory(Method method) {
+        private EventTaskReflectionArgumentsSupplierFactory(Method method) {
             reflectionArgumentsSupplierType = findMatchingReflectionArgumentsSupplierType(method);
             try {
                 reflectionArgumentsSupplierTypeConstructor =
-                        reflectionArgumentsSupplierType.getReflectionArgumentsSupplierClass().getDeclaredConstructor(JoinEvent.class);
+                        reflectionArgumentsSupplierType.getReflectionArgumentsSupplierClass().getDeclaredConstructor(Event.class);
                 ReflectionUtils.makeAccessible(reflectionArgumentsSupplierTypeConstructor);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(
-                        "ReflectionArgumentsSupplier implement must take a JoinEvent in the constructor.", e);
+                        "ReflectionArgumentsSupplier implement must take an Event subtype in the constructor.",
+                        e);
             }
         }
 
@@ -66,9 +73,9 @@ class JoinEventTaskHandler {
         }
 
         @Override
-        public ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier(JoinEvent joinEvent) {
+        public ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier(Event event) {
             try {
-                return (ReflectionArgumentsSupplier<T>) reflectionArgumentsSupplierTypeConstructor.newInstance(joinEvent);
+                return (ReflectionArgumentsSupplier<T>) reflectionArgumentsSupplierTypeConstructor.newInstance(event);
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalStateException("Unexpected reflective operation exception.", e);
             }
@@ -77,7 +84,8 @@ class JoinEventTaskHandler {
         private enum ReflectionArgumentsSupplierType {
             CHANNEL_ID(ChannelIdReflectionArgumentsSupplier.class, String.class),
             CHANNEL_ID_AND_USER_ID(ChannelIdUserIdReflectionArgumentsSupplier.class, String.class, String.class),
-            JOIN_EVENT(JoinEventReflectionArgumentsSupplier.class, JoinEvent.class);
+            JOIN_EVENT(EventReflectionArgumentsSupplier.class, JoinEvent.class),
+            LEAVE_EVENT(EventReflectionArgumentsSupplier.class, LeaveEvent.class);
 
             private final Class<? extends ReflectionArgumentsSupplier<?>> reflectionArgumentsSupplierClass;
             private final Class<?>[] argumentTypes;
@@ -103,45 +111,45 @@ class JoinEventTaskHandler {
 
     private static class ChannelIdReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<String> {
 
-        private final JoinEvent joinEvent;
+        private final Event event;
 
-        private ChannelIdReflectionArgumentsSupplier(JoinEvent joinEvent) {
-            this.joinEvent = joinEvent;
+        private ChannelIdReflectionArgumentsSupplier(Event event) {
+            this.event = event;
         }
 
         @Override
         public String[] get() {
-            return new String[]{ joinEvent.getSource().getSenderId() };
+            return new String[]{ event.getSource().getSenderId() };
         }
 
     }
 
     private static class ChannelIdUserIdReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<String> {
 
-        private final JoinEvent joinEvent;
+        private final Event event;
 
-        private ChannelIdUserIdReflectionArgumentsSupplier(JoinEvent joinEvent) {
-            this.joinEvent = joinEvent;
+        private ChannelIdUserIdReflectionArgumentsSupplier(Event event) {
+            this.event = event;
         }
 
         @Override
         public String[] get() {
-            return new String[]{ joinEvent.getSource().getSenderId(), joinEvent.getSource().getUserId() };
+            return new String[]{ event.getSource().getSenderId(), event.getSource().getUserId() };
         }
 
     }
 
-    private static class JoinEventReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<JoinEvent> {
+    private static class EventReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<Event> {
 
-        private final JoinEvent joinEvent;
+        private final Event event;
 
-        private JoinEventReflectionArgumentsSupplier(JoinEvent joinEvent) {
-            this.joinEvent = joinEvent;
+        private EventReflectionArgumentsSupplier(Event event) {
+            this.event = event;
         }
 
         @Override
-        public JoinEvent[] get() {
-            return new JoinEvent[]{ joinEvent };
+        public Event[] get() {
+            return new Event[]{ event };
         }
 
     }

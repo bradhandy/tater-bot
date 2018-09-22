@@ -3,7 +3,8 @@ package net.jackofalltrades.taterbot.service;
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import net.jackofalltrades.taterbot.event.JoinEventTask;
+import com.linecorp.bot.model.event.JoinEvent;
+import net.jackofalltrades.taterbot.event.EventTask;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class ChannelServiceManager {
         }
     }
 
-    @JoinEventTask
+    @EventTask(eventType = JoinEvent.class)
     @Transactional(rollbackFor = IncorrectUpdateSemanticsDataAccessException.class)
     public void addMissingServicesToChannel(String channelId) {
         List<String> missingServiceCodes = channelServiceDao.findMissingServicesForChannel(channelId);

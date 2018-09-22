@@ -1,10 +1,10 @@
 package net.jackofalltrades.taterbot.event;
 
-import com.linecorp.bot.model.event.JoinEvent;
+import com.linecorp.bot.model.event.Event;
 
 @FunctionalInterface
 interface ReflectionArgumentsSupplierFactory<T> {
 
-    ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier(JoinEvent joinEvent);
+    ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier(Event joinEvent);
 
 }
