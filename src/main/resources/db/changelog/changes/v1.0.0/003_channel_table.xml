@@ -48,8 +48,6 @@
         
         <createIndex tableName="channel_history" indexName="channel_history_idx1">
             <column name="channel_id" />
-            <column name="begin_date" />
-            <column name="end_date" />
         </createIndex>
 
         <rollback>

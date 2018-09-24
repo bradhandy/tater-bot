@@ -24,7 +24,7 @@ class ChannelDao {
 
     void insertChannel(Channel channel) {
         int recordsInserted = jdbcTemplate.update(
-                "insert into channel (channel_id, member, member_reason, begin_date) values (?, ?, ?, ?)",
+                "insert into channel (channel_id, member, member_reason, membership_date) values (?, ?, ?, ?)",
                 new ChannelInsertPreparedStatementSetter(channel));
         if (recordsInserted != 1) {
             throw new IncorrectUpdateSemanticsDataAccessException(

@@ -1,18 +1,22 @@
 package net.jackofalltrades.taterbot.channel;
 
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
 class ChannelHistoryDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ChannelHistoryRowMapper channelHistoryRowMapper;
 
     @Autowired
-    ChannelHistoryDao(JdbcTemplate jdbcTemplate) {
+    ChannelHistoryDao(JdbcTemplate jdbcTemplate, ChannelHistoryRowMapper channelHistoryRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.channelHistoryRowMapper = channelHistoryRowMapper;
     }
 
     void insertChannelHistory(ChannelHistory channelHistory) {
@@ -25,6 +29,11 @@ class ChannelHistoryDao {
             throw new IncorrectUpdateSemanticsDataAccessException(
                     String.format("Expected to insert one channel history record, but inserted %d.", recordsInserted));
         }
+    }
+
+    List<ChannelHistory> findHistoryForChannelId(String channelId) {
+        return jdbcTemplate.query("select * from channel_history where channel_id = ?", channelHistoryRowMapper,
+                channelId);
     }
 
 }

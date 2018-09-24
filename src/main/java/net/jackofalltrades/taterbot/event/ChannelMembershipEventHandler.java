@@ -2,6 +2,7 @@ package net.jackofalltrades.taterbot.event;
 
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.JoinEvent;
+import com.linecorp.bot.model.event.LeaveEvent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.event.source.RoomSource;
 import com.linecorp.bot.model.event.source.Source;
@@ -31,6 +32,11 @@ public class ChannelMembershipEventHandler {
 
     @EventMapping
     public void channelJoined(JoinEvent event) {
+        handleEvent(event);
+    }
+
+    @EventMapping
+    public void channelLeft(LeaveEvent event) {
         handleEvent(event);
     }
 

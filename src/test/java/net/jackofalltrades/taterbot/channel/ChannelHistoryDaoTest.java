@@ -1,13 +1,16 @@
 package net.jackofalltrades.taterbot.channel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +21,7 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelHistoryDaoTest {
@@ -29,7 +33,7 @@ class ChannelHistoryDaoTest {
 
     @BeforeEach
     void setUpChannelHistoryDao() {
-        channelHistoryDao = new ChannelHistoryDao(jdbcTemplate);
+        channelHistoryDao = new ChannelHistoryDao(jdbcTemplate, new ChannelHistoryRowMapper());
     }
 
     @Test
@@ -65,6 +69,20 @@ class ChannelHistoryDaoTest {
 
         assertThrows(IncorrectUpdateSemanticsDataAccessException.class,
                 () -> channelHistoryDao.insertChannelHistory(channelHistory));
+    }
+
+    @Test
+    void retrieveHistoryForChannelId() {
+        ChannelHistory channelHistory = new ChannelHistory("channelId", false, "Kicked",
+                LocalDateTime.now().minus(5, ChronoUnit.MINUTES), LocalDateTime.now());
+        ArrayList<ChannelHistory> channelHistoryList = Lists.newArrayList(channelHistory);
+
+        doReturn(channelHistoryList)
+                .when(jdbcTemplate)
+                .query(contains("from channel_history"), (ChannelHistoryRowMapper) notNull(), eq("channelId"));
+
+        assertSame(channelHistoryList, channelHistoryDao.findHistoryForChannelId("channelId"),
+                "The channel history list does not match.");
     }
 
 }

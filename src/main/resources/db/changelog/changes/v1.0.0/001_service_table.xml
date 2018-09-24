@@ -54,8 +54,6 @@
 
         <createIndex tableName="service_history" indexName="service_history_idx1">
             <column name="code" />
-            <column name="begin_date" />
-            <column name="end_date" />
         </createIndex>
 
         <rollback>

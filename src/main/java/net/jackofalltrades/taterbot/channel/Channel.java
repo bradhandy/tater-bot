@@ -42,12 +42,14 @@ public class Channel {
             return false;
         }
         Channel channel = (Channel) o;
-        return Objects.equals(channelId, channel.channelId);
+        return member == channel.member && Objects.equals(channelId, channel.channelId) &&
+                Objects.equals(memberReason, channel.memberReason) &&
+                Objects.equals(membershipDate, channel.membershipDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(channelId);
+        return Objects.hash(channelId, member, memberReason, membershipDate);
     }
 
 }
