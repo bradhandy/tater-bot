@@ -18,7 +18,6 @@ import java.util.Base64;
  * @author bhandy
  */
 @Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LinePayloadEncoder {
 
     private final ObjectMapper objectMapper;
