@@ -13,4 +13,11 @@ public interface ChannelCommand {
      */
     void execute();
 
+    /**
+     * The name of the command represented.
+     *
+     * @return The name of the command.
+     */
+    String getName();
+
 }

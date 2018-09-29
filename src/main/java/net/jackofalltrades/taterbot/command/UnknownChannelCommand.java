@@ -3,7 +3,7 @@ package net.jackofalltrades.taterbot.command;
 import org.springframework.stereotype.Component;
 
 @Component(UnknownChannelCommand.NAME)
-public final class UnknownChannelCommand implements ChannelCommand {
+final class UnknownChannelCommand implements ChannelCommand {
 
     static final String NAME = "unknown";
 
@@ -13,6 +13,11 @@ public final class UnknownChannelCommand implements ChannelCommand {
     @Override
     public void execute() {
         throw new UnsupportedOperationException("unknown command");
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }

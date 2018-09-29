@@ -1,5 +1,6 @@
 package net.jackofalltrades.taterbot.event;
 
+import com.google.common.base.Optional;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.JoinEvent;
 import com.linecorp.bot.model.event.LeaveEvent;
@@ -28,18 +29,21 @@ class EventTaskHandler {
         this.reflectionArgumentsSupplierFactory = new EventTaskReflectionArgumentsSupplierFactory<>(method);
     }
 
-    void handleEvent(Event event) {
-        ReflectionArgumentsSupplier<?> reflectionArgumentsSupplier =
-                reflectionArgumentsSupplierFactory.createReflectionArgumentsSupplier(event);
-        try {
-            method.invoke(bean, reflectionArgumentsSupplier.get());
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Unexpected exception while processing join event.", e);
+    void execute() {
+        if (supportedInContext()) {
+            ReflectionArgumentsSupplier<?> reflectionArgumentsSupplier =
+                    reflectionArgumentsSupplierFactory.createReflectionArgumentsSupplier();
+            try {
+                method.invoke(bean, reflectionArgumentsSupplier.get());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Unexpected exception while processing join event.", e);
+            }
         }
     }
 
-    boolean supports(Event event) {
-        return eventType.isInstance(event);
+    private boolean supportedInContext() {
+        Optional<Event> event = EventContext.getEvent();
+        return event.isPresent() && eventType.isInstance(event.get());
     }
 
     private static class EventTaskReflectionArgumentsSupplierFactory<T> implements ReflectionArgumentsSupplierFactory<T> {
@@ -51,7 +55,7 @@ class EventTaskHandler {
             reflectionArgumentsSupplierType = findMatchingReflectionArgumentsSupplierType(method);
             try {
                 reflectionArgumentsSupplierTypeConstructor =
-                        reflectionArgumentsSupplierType.getReflectionArgumentsSupplierClass().getDeclaredConstructor(Event.class);
+                        reflectionArgumentsSupplierType.getReflectionArgumentsSupplierClass().getDeclaredConstructor();
                 ReflectionUtils.makeAccessible(reflectionArgumentsSupplierTypeConstructor);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(
@@ -72,9 +76,9 @@ class EventTaskHandler {
         }
 
         @Override
-        public ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier(Event event) {
+        public ReflectionArgumentsSupplier<T> createReflectionArgumentsSupplier() {
             try {
-                return (ReflectionArgumentsSupplier<T>) reflectionArgumentsSupplierTypeConstructor.newInstance(event);
+                return (ReflectionArgumentsSupplier<T>) reflectionArgumentsSupplierTypeConstructor.newInstance();
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalStateException("Unexpected reflective operation exception.", e);
             }
@@ -110,45 +114,27 @@ class EventTaskHandler {
 
     private static class ChannelIdReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<String> {
 
-        private final Event event;
-
-        private ChannelIdReflectionArgumentsSupplier(Event event) {
-            this.event = event;
-        }
-
         @Override
         public String[] get() {
-            return new String[]{ event.getSource().getSenderId() };
+            return new String[]{ EventContext.getGroupId().orNull() };
         }
 
     }
 
     private static class ChannelIdUserIdReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<String> {
 
-        private final Event event;
-
-        private ChannelIdUserIdReflectionArgumentsSupplier(Event event) {
-            this.event = event;
-        }
-
         @Override
         public String[] get() {
-            return new String[]{ event.getSource().getSenderId(), event.getSource().getUserId() };
+            return new String[]{ EventContext.getGroupId().orNull(), EventContext.getUserId().orNull() };
         }
 
     }
 
     private static class EventReflectionArgumentsSupplier implements ReflectionArgumentsSupplier<Event> {
 
-        private final Event event;
-
-        private EventReflectionArgumentsSupplier(Event event) {
-            this.event = event;
-        }
-
         @Override
         public Event[] get() {
-            return new Event[]{ event };
+            return new Event[]{ EventContext.getEvent().orNull() };
         }
 
     }
