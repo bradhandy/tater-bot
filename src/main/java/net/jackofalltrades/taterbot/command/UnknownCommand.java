@@ -2,12 +2,12 @@ package net.jackofalltrades.taterbot.command;
 
 import org.springframework.stereotype.Component;
 
-@Component(UnknownChannelCommand.NAME)
-final class UnknownChannelCommand implements ChannelCommand {
+@Component(UnknownCommand.NAME)
+final class UnknownCommand implements Command {
 
     static final String NAME = "unknown";
 
-    UnknownChannelCommand() {
+    UnknownCommand() {
     }
 
     @Override

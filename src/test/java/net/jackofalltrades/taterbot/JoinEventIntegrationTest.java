@@ -22,11 +22,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = JoinEventIntegrationTest.TaterBotIntegrationConfiguration.class,
+@SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 public class JoinEventIntegrationTest {
@@ -146,19 +143,6 @@ public class JoinEventIntegrationTest {
         lineCallback.submit(joinEvent);
 
         assertEquals("There shouldn't be any channel services.", 0, getNumberOfChannelServices());
-    }
-
-    @Configuration
-    @ComponentScan(
-            basePackages = {
-                    "net.jackofalltrades.taterbot.service",
-                    "net.jackofalltrades.taterbot.channel",
-                    "net.jackofalltrades.taterbot.event",
-                    "net.jackofalltrades.taterbot.util"
-            })
-    @EnableAutoConfiguration
-    static class TaterBotIntegrationConfiguration {
-
     }
 
 }

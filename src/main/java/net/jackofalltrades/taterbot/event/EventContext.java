@@ -7,6 +7,9 @@ import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.ReplyEvent;
 import com.linecorp.bot.model.event.message.MessageContent;
+import com.linecorp.bot.model.event.source.GroupSource;
+import com.linecorp.bot.model.event.source.RoomSource;
+import com.linecorp.bot.model.event.source.Source;
 import org.springframework.core.NamedThreadLocal;
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -45,8 +48,12 @@ public final class EventContext {
     }
 
     public static Optional<String> getGroupId() {
-        Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
-        return currentEvent.transform((event) -> event.getSource().getSenderId());
+        if (isGroupEvent()) {
+            Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
+            return currentEvent.transform((event) -> event.getSource().getSenderId());
+        }
+
+        return Optional.absent();
     }
 
     public static Optional<String> getUserId() {
@@ -76,6 +83,11 @@ public final class EventContext {
         } finally {
             EventContext.clearEvent();
         }
+    }
+
+    public static boolean isGroupEvent() {
+        Source eventSource = CURRENT_EVENT.get().transform((event) -> ((Event) event).getSource()).orNull();
+        return eventSource instanceof GroupSource || eventSource instanceof RoomSource;
     }
 
 }

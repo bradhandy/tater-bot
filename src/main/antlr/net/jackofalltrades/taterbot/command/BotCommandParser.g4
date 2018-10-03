@@ -17,15 +17,16 @@ command:
 raw_command: (help_command | record_command | service_command);
 prefixed_command: PREFIX SPACE+ raw_command;
 
-help_command: HELP (SPACE+ non_help_command)?;
-record_command: RECORD SPACE+ record_action;
-service_command: SERVICE SPACE+ ((service_action SPACE+ service_type) | service_list_action);
+help_command: HELP;
+record_command: RECORD SPACE+ (record_action);
+service_command: SERVICE SPACE+ ((service_action SPACE+ service_type) | service_list_action | service_help_action);
 
 non_help_command: RECORD;
-any_command: HELP | non_help_command;
 
-record_action: START_ACTION | STOP_ACTION;
+record_action: START_ACTION | STOP_ACTION | HELP;
+
 service_action: DISABLE_ACTION | ENABLE_ACTION;
+service_help_action: HELP;
 service_list_action: LIST_ACTION;
 
 service_type: non_help_command | SNARK;

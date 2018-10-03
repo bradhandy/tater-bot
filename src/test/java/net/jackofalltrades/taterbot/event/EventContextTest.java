@@ -10,14 +10,12 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.event.source.RoomSource;
-import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.event.source.UserSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -42,7 +40,7 @@ class EventContextTest {
 
     @Test
     void verifyEventContextReset() {
-        verifyAllEventContextInformationAvailable();
+        verifyAvailableEventContextInformationForReplyEventWithRoomSource();
         EventContext.clearEvent();
         verifyEventContextInformationMissing();
     }
@@ -58,7 +56,7 @@ class EventContextTest {
     }
 
     @Test
-    void verifySomeEventContextInformationAvailable() {
+    void verifyAvailableEventContextInformationForNonReplyEventWithGroupSource() {
         LocalDateTime eventDateTime = LocalDateTime.now();
         Instant eventTimestamp = eventDateTime.toInstant(ZoneOffset.UTC);
         LeaveEvent leaveEvent = new LeaveEvent(new GroupSource("groupId", "userId"), eventTimestamp);
@@ -74,10 +72,11 @@ class EventContextTest {
         assertTrue(EventContext.getTimestamp().isPresent(), "The even timestamp should be present.");
         assertEquals(eventDateTime, EventContext.getTimestamp().get(), "The event timestamp does not match.");
         assertFalse(EventContext.getMessageContent().isPresent(), "The message content should be missing.");
+        assertTrue(EventContext.isGroupEvent(), "Should be a group event.");
     }
 
     @Test
-    void verifyAllEventContextInformationAvailable() {
+    void verifyAvailableEventContextInformationForReplyEventWithRoomSource() {
         LocalDateTime eventDateTime = LocalDateTime.now();
         Instant eventTimestamp = eventDateTime.toInstant(ZoneOffset.UTC);
         TextMessageContent textMessageContent = new TextMessageContent("id", "text");
@@ -97,6 +96,30 @@ class EventContextTest {
         assertEquals(eventDateTime, EventContext.getTimestamp().get(), "The event timestamp does not match.");
         assertTrue(EventContext.getMessageContent().isPresent(), "The message content should be present.");
         assertSame(textMessageContent, EventContext.getMessageContent().get(), "The message content does not match.");
+        assertTrue(EventContext.isGroupEvent(), "Should be a group event.");
+    }
+
+    @Test
+    void verifyAvailableEventContextInformationForReplyEventWithUserSource() {
+        LocalDateTime eventDateTime = LocalDateTime.now();
+        Instant eventTimestamp = eventDateTime.toInstant(ZoneOffset.UTC);
+        TextMessageContent textMessageContent = new TextMessageContent("id", "text");
+        MessageEvent<TextMessageContent> messageEvent = new MessageEvent<>("replyToken",
+                new UserSource("userId"), textMessageContent, eventTimestamp);
+        EventContext.setEvent(messageEvent);
+
+        assertTrue(EventContext.getEvent().isPresent(), "The event should be present.");
+        assertSame(messageEvent, EventContext.getEvent().get(), "The event does not match.");
+        assertTrue(EventContext.getReplyToken().isPresent(), "The reply token should be present.");
+        assertEquals("replyToken", EventContext.getReplyToken().get(), "The reply token does not match.");
+        assertFalse(EventContext.getGroupId().isPresent(), "The group id should be missing.");
+        assertTrue(EventContext.getUserId().isPresent(), "The user id should be present.");
+        assertEquals("userId", EventContext.getUserId().get(), "The user id does not match.");
+        assertTrue(EventContext.getTimestamp().isPresent(), "The even timestamp should be present.");
+        assertEquals(eventDateTime, EventContext.getTimestamp().get(), "The event timestamp does not match.");
+        assertTrue(EventContext.getMessageContent().isPresent(), "The message content should be present.");
+        assertSame(textMessageContent, EventContext.getMessageContent().get(), "The message content does not match.");
+        assertFalse(EventContext.isGroupEvent(), "Should not be a group event.");
     }
 
 }

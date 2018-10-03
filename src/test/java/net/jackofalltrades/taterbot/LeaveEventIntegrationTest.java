@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
+import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.event.JoinEvent;
 import com.linecorp.bot.model.event.LeaveEvent;
 import com.linecorp.bot.model.event.source.GroupSource;
@@ -32,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = JoinEventIntegrationTest.TaterBotIntegrationConfiguration.class,
+@SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 public class LeaveEventIntegrationTest {
@@ -80,7 +81,6 @@ public class LeaveEventIntegrationTest {
         assertFalse("The channel membership status does not match.", channel.get().isMember());
         assertEquals("The channel membership reason does not match.", "Kicked", channel.get().getMemberReason());
     }
-
 
     @Test
     public void joiningChannelAfterLeavingCreatesHistoryRecord() throws Exception {

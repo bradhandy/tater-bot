@@ -10,7 +10,7 @@ class UnknownCommandTest {
 
     @Test
     void executeShouldThrowUnsupportedOperationException() {
-        UnknownChannelCommand unknownChannelCommand = new UnknownChannelCommand();
+        UnknownCommand unknownChannelCommand = new UnknownCommand();
         Assertions.assertThrows(UnsupportedOperationException.class, unknownChannelCommand::execute);
     }
 
