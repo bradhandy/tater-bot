@@ -11,7 +11,7 @@ package net.jackofalltrades.taterbot.command;
 
 command:
     (raw_command | prefixed_command)
-    SPACE* UNKNOWN_SYMBOLS*
+    (SPACE | UNKNOWN_SYMBOLS)*
     EOF;
 
 raw_command: (help_command | record_command | service_command);

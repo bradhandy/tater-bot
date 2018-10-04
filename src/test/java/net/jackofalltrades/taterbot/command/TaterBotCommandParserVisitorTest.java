@@ -5,11 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 
 import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.event.MessageEvent;
-import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.event.source.GroupSource;
-import com.linecorp.bot.model.event.source.UserSource;
 import net.jackofalltrades.taterbot.event.EventContext;
+import net.jackofalltrades.taterbot.util.EventTestingUtil;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -20,8 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @ExtendWith(MockitoExtension.class)
 class TaterBotCommandParserVisitorTest {
@@ -64,7 +59,7 @@ class TaterBotCommandParserVisitorTest {
 
     @Test
     void unknownCommandWhenMissingPrefixForChannelMessage() {
-        setupGroupSourcedTextMessageEvent();
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "groupId", "userId", "id", "");
 
         BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("help"));
         TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
@@ -82,7 +77,7 @@ class TaterBotCommandParserVisitorTest {
                 .when(applicationContext)
                 .getBean(HelpCommand.NAME, Command.class);
 
-        setupGroupSourcedTextMessageEvent();
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "groupId", "userId", "id", "");
 
         BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("taterbot help"));
         TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
@@ -99,7 +94,7 @@ class TaterBotCommandParserVisitorTest {
                 .when(applicationContext)
                 .getBean(HelpCommand.NAME, Command.class);
 
-        setupUserSourcedTextMessageEvent();
+        EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
 
         BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("help"));
         TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
@@ -116,7 +111,7 @@ class TaterBotCommandParserVisitorTest {
                 .when(applicationContext)
                 .getBean(HelpCommand.NAME, Command.class);
 
-        setupUserSourcedTextMessageEvent();
+        EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
 
         BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("taterbot help"));
         TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
@@ -127,14 +122,38 @@ class TaterBotCommandParserVisitorTest {
         assertEquals("help", command.getName(), "The command name does not match.");
     }
 
-    private void setupUserSourcedTextMessageEvent() {
-        EventContext.setEvent(new MessageEvent<>("replyToken", new UserSource("userId"),
-                new TextMessageContent("id", ""), LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+    @Test
+    void recordHelpCommandWhenRequestedWithPrefixInChannel() {
+        doReturn(new RecordHelpCommand(lineMessagingClient))
+                .when(applicationContext)
+                .getBean(RecordHelpCommand.NAME, Command.class);
+
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("taterbot record help"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertNotNull(command, "There should have been a command returned.");
+        assertEquals("record-help", command.getName(), "The command name does not match.");
     }
 
-    private void setupGroupSourcedTextMessageEvent() {
-        EventContext.setEvent(new MessageEvent<>("replyToken", new GroupSource("groupId", "userId"),
-                new TextMessageContent("id", ""), LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+    @Test
+    void recordHelpCommandWhenRequestedInPrivateChat() {
+        doReturn(new RecordHelpCommand(lineMessagingClient))
+                .when(applicationContext)
+                .getBean(RecordHelpCommand.NAME, Command.class);
+
+        EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("record help"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertNotNull(command, "There should have been a command returned.");
+        assertEquals("record-help", command.getName(), "The command name does not match.");
     }
 
 }

@@ -16,6 +16,7 @@ import com.linecorp.bot.model.message.TextMessage;
 import net.jackofalltrades.taterbot.command.annotation.ChannelCommand;
 import net.jackofalltrades.taterbot.command.annotation.UserCommand;
 import net.jackofalltrades.taterbot.event.EventContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,12 @@ class HelpCommandTest {
     void setUpHelpCommand() {
         helpCommand = new HelpCommand(lineMessagingClient);
         helpCommand.setApplicationContext(applicationContext);
+    }
+
+    @BeforeEach
+    @AfterEach
+    void clearEventContext() {
+        EventContext.clearEvent();
     }
 
     @Test
