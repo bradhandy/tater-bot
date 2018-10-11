@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="create-channel-record-table" author="bradHandy" dbms="h2,postgresql">
+        <createTable tableName="channel_record">
+            <column name="channel_id" type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(256)">
+                <constraints nullable="true" />
+            </column>
+            <column name="user_display_name" type="varchar(256)">
+                <constraints nullable="true" />
+            </column>
+            <column name="message_type" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="message_timestamp" type="timestamp with time zone">
+                <constraints nullable="false" />
+            </column>
+            <column name="message" type="text">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createIndex tableName="channel_record" indexName="channel_record_idx">
+            <column name="channel_id" />
+            <column name="message_timestamp" />
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="channel_record" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

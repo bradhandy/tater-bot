@@ -9,6 +9,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.jackofalltrades.taterbot.service.ChannelService;
+import net.jackofalltrades.taterbot.service.ChannelServiceFactory;
 import net.jackofalltrades.taterbot.service.ChannelServiceKey;
 import net.jackofalltrades.taterbot.service.ChannelServiceManager;
 import net.jackofalltrades.taterbot.service.Service;
@@ -45,6 +46,7 @@ public class InitialDatabaseMigrationTest {
                     .put("ADMIN_HISTORY", "PUBLIC")
                     .put("CHANNEL_ADMIN", "PUBLIC")
                     .put("CHANNEL_ADMIN_HISTORY", "PUBLIC")
+                    .put("CHANNEL_RECORD", "PUBLIC")
                     .put("DATABASECHANGELOG", "PUBLIC")
                     .put("DATABASECHANGELOGLOCK", "PUBLIC").build();
 
@@ -135,8 +137,8 @@ public class InitialDatabaseMigrationTest {
     }
 
     private void addMissingServicesToChannel() {
-        ChannelService recordChannelService = new ChannelService("channelId", "record", Service.Status.INACTIVE,
-                LocalDateTime.now(), null);
+        ChannelService recordChannelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
+                Service.Status.INACTIVE, LocalDateTime.now(), null);
         Map<String, ChannelService> expectedChannelServicesMap = Maps.newHashMap();
         expectedChannelServicesMap.put("record", recordChannelService);
 

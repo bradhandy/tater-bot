@@ -11,7 +11,7 @@ public class ChannelService {
     private final LocalDateTime statusDate;
     private final String userId;
 
-    public ChannelService(String channelId, String serviceCode, Service.Status status, LocalDateTime statusDate,
+    ChannelService(String channelId, String serviceCode, Service.Status status, LocalDateTime statusDate,
             String userId) {
         this.channelId = channelId;
         this.serviceCode = serviceCode;

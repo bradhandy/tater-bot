@@ -25,10 +25,10 @@ public class TextMessageEventHandler {
 
     @EventMapping
     public void handleTextEvent(MessageEvent<TextMessageContent> textMessageEvent) {
-        EventContext.doWithEvent(textMessageEvent, this::process);
+        EventContext.doWithEvent(textMessageEvent, this::processCommand);
     }
 
-    private void process() {
+    private void processCommand() {
         Optional<TextMessageContent> textMessageContent = EventContext.getMessageContent();
         Optional<Command> command = textMessageContent.transform(input -> {
             BotCommandLexer lexer = new BotCommandLexer(CharStreams.fromString(input.getText()));
