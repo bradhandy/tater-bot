@@ -25,7 +25,7 @@ non_help_command: RECORD;
 
 record_action: START_ACTION | STOP_ACTION | HELP;
 
-service_action: DISABLE_ACTION | ENABLE_ACTION;
+service_action: DISABLE_ACTION | ENABLE_ACTION | STATUS_ACTION;
 service_help_action: HELP;
 service_list_action: LIST_ACTION;
 

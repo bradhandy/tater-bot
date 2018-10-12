@@ -26,6 +26,7 @@ STOP_ACTION: [Ss] [Tt] [Oo] [Pp];
 // service command actions.
 DISABLE_ACTION: [Dd] [Ii] [Ss] [Aa] [Bb] [Ll] [Ee];
 ENABLE_ACTION: [Ee] [Nn] [Aa] [Bb] [Ll] [Ee];
+STATUS_ACTION: [Ss] [Tt] [Aa] [Tt] [Uu] [Ss];
 LIST_ACTION: [Ll] [Ii] [Ss] [Tt];
 
 // service types.

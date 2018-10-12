@@ -2,6 +2,7 @@ package net.jackofalltrades.taterbot.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import com.linecorp.bot.client.LineMessagingClient;
@@ -154,6 +155,40 @@ class TaterBotCommandParserVisitorTest {
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
         assertNotNull(command, "There should have been a command returned.");
         assertEquals("record-help", command.getName(), "The command name does not match.");
+    }
+
+    @Test
+    void channelServiceStatusCommandWhenRequestedWithPrefixInChannel() {
+        doReturn(new ChannelServiceStatusCommand(null, null, null, null))
+                .when(applicationContext)
+                .getBean(ChannelServiceStatusCommand.NAME, Command.class);
+
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("taterbot service status record"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertNotNull(command, "There should have been a command returned.");
+        assertEquals("service-status", command.getName(), "The command name does not match.");
+
+        ChannelServiceStatusCommand channelServiceStatusCommand = new ChannelServiceStatusCommand(null, null, null,
+                null);
+        channelServiceStatusCommand.setServiceName("record");
+        assertEquals(channelServiceStatusCommand, command, "The command does not match.");
+    }
+
+    @Test
+    void channelServiceStatusCommandWhenRequestedInPrivateChat() {
+        EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("service status record"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertTrue(command instanceof UnknownCommand, "The command does not match.");
     }
 
 }
