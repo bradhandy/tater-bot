@@ -4,13 +4,15 @@ import com.google.common.collect.Lists;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.TextMessage;
+import net.jackofalltrades.taterbot.command.annotation.ChannelCommand;
 import net.jackofalltrades.taterbot.event.EventContext;
 import org.springframework.stereotype.Component;
 
+@ChannelCommand
 @Component(RecordHelpCommand.NAME)
 class RecordHelpCommand implements Command {
 
-    static final String NAME = "record-help";
+    static final String NAME = "record";
 
     private final LineMessagingClient lineMessagingClient;
 

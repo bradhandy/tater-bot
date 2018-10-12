@@ -30,7 +30,7 @@ class RecordHelpCommandTest {
 
     @Test
     void recordHelpCommandName() {
-        assertEquals("record-help", recordHelpCommand.getName(), "The record help command name does not match.");
+        assertEquals("record", recordHelpCommand.getName(), "The record help command name does not match.");
     }
 
     @Test

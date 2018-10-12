@@ -17,6 +17,7 @@ import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.event.source.UserSource;
 import com.linecorp.bot.model.message.TextMessage;
 import net.jackofalltrades.taterbot.command.annotation.ChannelCommand;
+import net.jackofalltrades.taterbot.command.annotation.UserCommand;
 import net.jackofalltrades.taterbot.util.LineCallback;
 import org.junit.After;
 import org.junit.Before;
@@ -96,7 +97,7 @@ public class HelpCommandIntegerationTest {
         assertTrue("The message should be a text message.", replyMessage.getMessages().get(0) instanceof TextMessage);
 
         TextMessage textMessage = (TextMessage) Iterables.getFirst(replyMessage.getMessages(), null);
-        assertEquals("The help message does not match.", createExpectedMessage(ChannelCommand.class),
+        assertEquals("The help message does not match.", createExpectedMessage(UserCommand.class),
                 textMessage.getText());
     }
 

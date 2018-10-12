@@ -54,8 +54,7 @@ class TaterBotCommandParserVisitorTest {
         commandParser.removeErrorListeners();
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("unknown", UnknownCommand.NAME, "The command name does not match.");
+        assertTrue(command instanceof UnknownCommand, "The command does not match.");
     }
 
     @Test
@@ -68,8 +67,7 @@ class TaterBotCommandParserVisitorTest {
         commandParser.removeErrorListeners();
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("unknown", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof UnknownCommand, "The command does not match.");
     }
 
     @Test
@@ -85,8 +83,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("help", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof HelpCommand, "The command does not match.");
     }
 
     @Test
@@ -102,8 +99,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("help", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof HelpCommand, "The command does not match.");
     }
 
     @Test
@@ -119,8 +115,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("help", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof HelpCommand, "The command does not match.");
     }
 
     @Test
@@ -136,8 +131,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("record-help", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof RecordHelpCommand, "The command does not match.");
     }
 
     @Test
@@ -153,8 +147,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertNotNull(command, "There should have been a command returned.");
-        assertEquals("record-help", command.getName(), "The command name does not match.");
+        assertTrue(command instanceof RecordHelpCommand, "The command does not match.");
     }
 
     @Test
