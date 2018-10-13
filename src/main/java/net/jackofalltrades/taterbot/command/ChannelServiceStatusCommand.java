@@ -12,7 +12,9 @@ import net.jackofalltrades.taterbot.channel.profile.ChannelUserProfileKey;
 import net.jackofalltrades.taterbot.event.EventContext;
 import net.jackofalltrades.taterbot.service.ChannelService;
 import net.jackofalltrades.taterbot.service.ChannelServiceKey;
+import net.jackofalltrades.taterbot.service.ChannelServiceManager;
 import net.jackofalltrades.taterbot.service.Service;
+import net.jackofalltrades.taterbot.service.ServiceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,25 +25,25 @@ import java.util.Objects;
 
 @Component(ChannelServiceStatusCommand.NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-class ChannelServiceStatusCommand implements Command {
+class ChannelServiceStatusCommand implements Command, ServiceNameAware {
 
     static final Logger LOG = LoggerFactory.getLogger(ChannelServiceStatusCommand.class);
     static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'");
     static final String NAME = "service-status";
 
     private final LineMessagingClient lineMessagingClient;
-    private final LoadingCache<String, Service> serviceCache;
-    private final LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache;
+    private final ServiceManager serviceManager;
+    private final ChannelServiceManager channelServiceManager;
     private final LoadingCache<ChannelUserProfileKey, UserProfileResponse> channelUserProfileCache;
 
     private String serviceName;
 
-    ChannelServiceStatusCommand(LineMessagingClient lineMessagingClient, LoadingCache<String, Service> serviceCache,
-            LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache,
+    ChannelServiceStatusCommand(LineMessagingClient lineMessagingClient, ServiceManager serviceManager,
+            ChannelServiceManager channelServiceManager,
             LoadingCache<ChannelUserProfileKey, UserProfileResponse> channelUserProfileCache) {
         this.lineMessagingClient = lineMessagingClient;
-        this.serviceCache = serviceCache;
-        this.channelServiceCache = channelServiceCache;
+        this.serviceManager = serviceManager;
+        this.channelServiceManager = channelServiceManager;
         this.channelUserProfileCache = channelUserProfileCache;
     }
 
@@ -53,12 +55,22 @@ class ChannelServiceStatusCommand implements Command {
 
         String channelId = EventContext.getGroupId().orNull();
 
-        ChannelService channelService = channelServiceCache.getUnchecked(new ChannelServiceKey(channelId, serviceName));
-        Service service = serviceCache.getUnchecked(channelService.getServiceCode());
+        Optional<ChannelService> optionalChannelService =
+                channelServiceManager.findChannelServiceByKey(new ChannelServiceKey(channelId, serviceName));
+        String channelServiceStatusMessage = optionalChannelService.transform(this::createChannelServiceStatusMessage)
+                        .or(String.format("'%s' is an invalid service for this channel.", serviceName));
+
+        lineMessagingClient.replyMessage(
+                new ReplyMessage(EventContext.getReplyToken().orNull(), new TextMessage(channelServiceStatusMessage)));
+    }
+
+    private String createChannelServiceStatusMessage(ChannelService channelService) {
+        Service service = serviceManager.findServiceByCode(channelService.getServiceCode());
         Optional<UserProfileResponse> userProfileResponse = Optional.absent();
         if (!Strings.isNullOrEmpty(channelService.getUserId())) {
             try {
-                ChannelUserProfileKey channelUserKey = new ChannelUserProfileKey(channelId, channelService.getUserId());
+                ChannelUserProfileKey channelUserKey =
+                        new ChannelUserProfileKey(channelService.getChannelId(), channelService.getUserId());
                 userProfileResponse = Optional.of(channelUserProfileCache.getUnchecked(channelUserKey));
             } catch (UncheckedExecutionException e) {
                 LOG.info("Failed to retrieve channel user profile from cache.", e);
@@ -68,11 +80,9 @@ class ChannelServiceStatusCommand implements Command {
         String changedByString = userProfileResponse
                 .transform((userProfile) -> String.format(" (changed by @%s)", userProfile.getDisplayName()))
                 .or("");
-        String message = String.format("'%s' service is %s as of %s.%s", service.getCode(),
+        return String.format("'%s' service is %s as of %s.%s", service.getCode(),
                 channelService.getStatus().name().toLowerCase(),
                 DATE_TIME_FORMATTER.format(channelService.getStatusDate()), changedByString);
-
-        lineMessagingClient.replyMessage(new ReplyMessage(EventContext.getReplyToken().orNull(), new TextMessage(message)));
     }
 
     @Override
@@ -80,7 +90,7 @@ class ChannelServiceStatusCommand implements Command {
         return NAME;
     }
 
-    void setServiceName(String serviceName) {
+    public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
 

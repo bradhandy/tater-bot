@@ -1,7 +1,5 @@
 package net.jackofalltrades.taterbot.command;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import net.jackofalltrades.taterbot.event.EventContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -43,23 +41,7 @@ class TaterBotCommandParserVisitor extends BotCommandParserBaseVisitor<Command> 
     @Override
     public Command visitService_command(BotCommandParser.Service_commandContext ctx) {
         if (EventContext.isGroupEvent()) {
-            BotCommandParser.Service_actionContext serviceActionContext =
-                    ctx.getRuleContext(BotCommandParser.Service_actionContext.class, 0);
-            String action = Optional.fromNullable(serviceActionContext)
-                    .transform((ruleContext) -> ruleContext.getText())
-                    .or("");
-            if (action.equals("status")) {
-                Command statusCommand = applicationContext.getBean(ChannelServiceStatusCommand.NAME, Command.class);
-                BotCommandParser.Service_typeContext serviceTypeContext =
-                        ctx.getRuleContext(BotCommandParser.Service_typeContext.class, 0);
-                String serviceName = Optional.fromNullable(serviceTypeContext)
-                        .transform((ruleContext) -> ruleContext.getText())
-                        .or("");
-                if (!Strings.isNullOrEmpty(serviceName)) {
-                    ((ChannelServiceStatusCommand) statusCommand).setServiceName(serviceName);
-                    return statusCommand;
-                }
-            }
+            return ctx.accept(new ServiceCommandParserVisitor(applicationContext));
         }
 
         return null;

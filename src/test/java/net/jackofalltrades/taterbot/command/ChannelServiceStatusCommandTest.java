@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.linecorp.bot.client.LineMessagingClient;
@@ -19,8 +20,10 @@ import net.jackofalltrades.taterbot.channel.profile.ChannelUserProfileKey;
 import net.jackofalltrades.taterbot.service.ChannelService;
 import net.jackofalltrades.taterbot.service.ChannelServiceFactory;
 import net.jackofalltrades.taterbot.service.ChannelServiceKey;
+import net.jackofalltrades.taterbot.service.ChannelServiceManager;
 import net.jackofalltrades.taterbot.service.Service;
 import net.jackofalltrades.taterbot.service.ServiceFactory;
+import net.jackofalltrades.taterbot.service.ServiceManager;
 import net.jackofalltrades.taterbot.util.EventTestingUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +42,13 @@ class ChannelServiceStatusCommandTest {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'");
 
     @Mock
+    private ServiceManager serviceManager;
+
+    @Mock
+    private ChannelServiceManager channelServiceManager;
+
+    @Mock
     private LineMessagingClient lineMessagingClient;
-
-    @Mock
-    private LoadingCache<String, Service> serviceCache;
-
-    @Mock
-    private LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache;
 
     @Mock
     private LoadingCache<ChannelUserProfileKey, UserProfileResponse> channelUserProfileCache;
@@ -54,8 +57,8 @@ class ChannelServiceStatusCommandTest {
 
     @BeforeEach
     void setUpChannelServiceStatusCommand() {
-        channelServiceStatusCommand = new ChannelServiceStatusCommand(lineMessagingClient, serviceCache,
-                channelServiceCache, channelUserProfileCache);
+        channelServiceStatusCommand = new ChannelServiceStatusCommand(lineMessagingClient, serviceManager,
+                channelServiceManager, channelUserProfileCache);
         channelServiceStatusCommand.setServiceName("record");
     }
 
@@ -73,8 +76,10 @@ class ChannelServiceStatusCommandTest {
         UserProfileResponse userProfileResponse = new UserProfileResponse("displayName", "userId", "http://image",
                 "status");
 
-        doReturn(service).when(serviceCache).getUnchecked("record");
-        doReturn(channelService).when(channelServiceCache).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        doReturn(service).when(serviceManager).findServiceByCode("record");
+        doReturn(Optional.of(channelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
         doReturn(userProfileResponse)
                 .when(channelUserProfileCache)
                 .getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
@@ -93,8 +98,8 @@ class ChannelServiceStatusCommandTest {
                 DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
                 "The message does not match.");
 
-        verify(serviceCache, times(1)).getUnchecked("record");
-        verify(channelServiceCache, times(1)).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        verify(serviceManager, times(1)).findServiceByCode("record");
+        verify(channelServiceManager, times(1)).findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
         verify(channelUserProfileCache, times(1)).getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
     }
 
@@ -110,8 +115,10 @@ class ChannelServiceStatusCommandTest {
         ChannelService channelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
                 Service.Status.INACTIVE, channelServiceStatusDate, null);
 
-        doReturn(service).when(serviceCache).getUnchecked("record");
-        doReturn(channelService).when(channelServiceCache).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        doReturn(service).when(serviceManager).findServiceByCode("record");
+        doReturn(Optional.of(channelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
 
         channelServiceStatusCommand.execute();
 
@@ -127,8 +134,8 @@ class ChannelServiceStatusCommandTest {
                 DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
                 "The message does not match.");
 
-        verify(serviceCache, times(1)).getUnchecked("record");
-        verify(channelServiceCache, times(1)).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        verify(serviceManager, times(1)).findServiceByCode(anyString());
+        verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
         verify(channelUserProfileCache, never()).getUnchecked(any(ChannelUserProfileKey.class));
     }
 
@@ -144,8 +151,10 @@ class ChannelServiceStatusCommandTest {
         ChannelService channelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
                 Service.Status.INACTIVE, channelServiceStatusDate, "userId");
 
-        doReturn(service).when(serviceCache).getUnchecked("record");
-        doReturn(channelService).when(channelServiceCache).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        doReturn(service).when(serviceManager).findServiceByCode("record");
+        doReturn(Optional.of(channelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
         doThrow(new UncheckedExecutionException(new TimeoutException()))
                 .when(channelUserProfileCache)
                 .getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
@@ -164,8 +173,8 @@ class ChannelServiceStatusCommandTest {
                 DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
                 "The message does not match.");
 
-        verify(serviceCache, times(1)).getUnchecked("record");
-        verify(channelServiceCache, times(1)).getUnchecked(new ChannelServiceKey("channelId", "record"));
+        verify(serviceManager, times(1)).findServiceByCode(anyString());
+        verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
         verify(channelUserProfileCache, times(1)).getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
     }
 
@@ -176,8 +185,36 @@ class ChannelServiceStatusCommandTest {
         channelServiceStatusCommand.execute();
 
         verify(lineMessagingClient, never()).replyMessage(any(ReplyMessage.class));
-        verify(serviceCache, never()).getUnchecked(anyString());
-        verify(channelServiceCache, never()).getUnchecked(any(ChannelServiceKey.class));
+        verify(serviceManager, never()).findServiceByCode(anyString());
+        verify(channelServiceManager, never()).findChannelServiceByKey(any(ChannelServiceKey.class));
+        verify(channelUserProfileCache, never()).getUnchecked(any(ChannelUserProfileKey.class));
+    }
+
+    @Test
+    void errorMessageShouldPrintWhenInvalidService() {
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id",
+                "service invalid status");
+
+        doReturn(Optional.<ChannelService>absent())
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "invalid"));
+
+        channelServiceStatusCommand.setServiceName("invalid");
+        channelServiceStatusCommand.execute();
+
+        ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
+        verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
+
+        ReplyMessage replyMessage = replyMessageCaptor.getValue();
+        assertEquals("replyToken", replyMessage.getReplyToken(), "The reply token does not match.");
+        assertEquals(1, replyMessage.getMessages().size(), "There should be one message.");
+
+        TextMessage textMessage = (TextMessage) replyMessage.getMessages().get(0);
+        assertEquals("'invalid' is an invalid service for this channel.", textMessage.getText(),
+                "The message does not match.");
+
+        verify(serviceManager, never()).findServiceByCode(anyString());
+        verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
         verify(channelUserProfileCache, never()).getUnchecked(any(ChannelUserProfileKey.class));
     }
 

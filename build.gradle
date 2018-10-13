@@ -40,6 +40,11 @@ generateGrammarSource {
 }
 
 dependencyManagement {
+    
+    // mockito is the only library with a direct dependency on this, and it wants 1.8.13.  I'm not sure
+    // from where the earlier dependency is resolved.  We'll set this specifically to 1.8.13.  Any time
+    // Mockito upgraded, comment this dependency management entry to find the new required version of
+    // byte-buddy.
     dependencies {
         dependencySet(group: 'net.bytebuddy', version: '1.8.10') {
             entry "byte-buddy"
@@ -73,13 +78,13 @@ dependencies {
     }
     testCompile("org.springframework.boot:spring-boot-starter-webflux")
 
-    testCompile("org.mockito:mockito-core:2.19.0")
-    testCompile("org.mockito:mockito-junit-jupiter:2.19.0")
+    testCompile("org.mockito:mockito-core:2.19.6")
+    testCompile("org.mockito:mockito-junit-jupiter:2.19.6")
     testCompile("org.junit.jupiter:junit-jupiter-api:5.3.0")
     testCompile("org.junit.jupiter:junit-jupiter-params:5.3.0")
     testCompile("org.junit.vintage:junit-vintage-engine:5.3.0")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.0")
 
     // this is used to verify the liquibase functionality against a database.
-    testRuntime("com.h2database:h2")
+    testRuntime("com.h2database:h2:1.4.197")
 }
