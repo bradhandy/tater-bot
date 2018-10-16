@@ -25,7 +25,10 @@ question database for your channel after the session has completed.
 * Service Enable/Disable:  The ability to enable/disable any of the services the bot offers.  Snarky commentary
   is a service which allows the bot to produce snarky output for certain commands.  If you don't want the snarky
   commentary, then disable it.  Other services can be enabled/disabled as well.
-  
+
+
+### Dedications
+Recording dedicated to 'NinjaNurse-PA &#x1F489' for the work she has done for the Dungeon Boss player community.
   
 ### Dependencies
 The bot uses the following software dependencies:
