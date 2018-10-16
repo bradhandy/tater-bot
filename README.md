@@ -28,7 +28,7 @@ question database for your channel after the session has completed.
 
 
 ### Dedications
-Recording dedicated to 'NinjaNurse-PA &#128137' for the work she has done for the Dungeon Boss player community.
+Recording dedicated to 'NinjaNurse-PA &#x1F489;' for the work she has done for the Dungeon Boss player community.
   
 ### Dependencies
 The bot uses the following software dependencies:
