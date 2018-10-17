@@ -6,6 +6,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'antlr'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
 
 group 'net.jack-of-all-trades'
 version '1.0-SNAPSHOT'
@@ -16,12 +17,24 @@ repositories {
     maven { url "https://dl.bintray.com/mockito/maven" }
 }
 
+bootJar {
+    launchScript()
+}
+
 test {
     useJUnitPlatform {
         includeEngines 'junit-jupiter', 'junit-vintage'
     }
 
     failFast = true
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled false
+    }
 }
 
 idea {

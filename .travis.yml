@@ -5,7 +5,7 @@ sudo: false
 jdk:
   - oraclejdk8
   - oraclejdk9
-  - oraclejdk10
+  # - oraclejdk10
   - openjdk8
   - openjdk9
   - openjdk10
@@ -17,3 +17,10 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+
+script:
+  - ./gradlew check
+  - ./gradlew jacocoTestReport
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
