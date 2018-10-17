@@ -2,6 +2,7 @@
 [![Travis CI Build Status](https://travis-ci.org/bradhandy/tater-bot.svg?branch=master)](https://www.travis-ci.org/bradhandy/tater-bot)
 [![Java 8+](https://img.shields.io/badge/java-8+-blue.svg?maxAge=3600)](http://java.oracle.com/)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-orange.svg?maxAge=3600)](https://raw.githubusercontent.com/bradhandy/tater-bot/master/LICENSE)
+[![codecov](https://codecov.io/gh/bradhandy/tater-bot/branch/master/graph/badge.svg)](https://codecov.io/gh/bradhandy/tater-bot)
 
 Tater Bot is a bot connected to the Line (https://line.me/) chat servers.  Line is the chat platform of
 choice for players in the top-level guilds of Dungeon Boss.
