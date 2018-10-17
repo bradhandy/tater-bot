@@ -120,17 +120,10 @@ public class ChannelRecordManager {
     }
 
     private boolean recordingServiceIsEnabled(String channelId) {
-        boolean serviceGloballyEnabled =
-                serviceManager.findServiceByCode(Service.RECORD_SERVICE_CODE).getStatus() == Service.Status.ACTIVE;
-        if (serviceGloballyEnabled) {
-            boolean channelServiceEnabled = channelServiceManager
-                    .findChannelServiceByKey(new ChannelServiceKey(channelId, Service.RECORD_SERVICE_CODE))
-                    .transform((channelService) -> channelService.getStatus() == Service.Status.ACTIVE)
-                    .or(false);
-            return channelServiceEnabled;
-        }
-
-        return serviceGloballyEnabled;
+        return channelServiceManager
+                .findChannelServiceByKey(new ChannelServiceKey(channelId, Service.RECORD_SERVICE_CODE))
+                .transform((channelService) -> channelService.getStatus() == Service.Status.ACTIVE)
+                .or(false);
     }
 
     private Optional<UserProfileResponse> retrieveUserProfileInChannel(String channelId, String userId) {

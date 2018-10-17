@@ -441,12 +441,9 @@ class ChannelRecordManagerTest {
 
     @Test
     void recordTextMessageWhenRecordingEnabled() throws Exception {
-        Service activeService = ServiceFactory.createService("record", "Channel recording", Service.Status.ACTIVE,
-                LocalDateTime.now(), Service.Status.INACTIVE);
         ChannelService activeChannelService = ChannelServiceFactory.createChannelServiceFactory(
                 "channelId", "record", Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
-        doReturn(activeService).when(serviceManager).findServiceByCode("record");
         doReturn(Optional.of(activeChannelService))
                 .when(channelServiceManager)
                 .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
@@ -467,32 +464,35 @@ class ChannelRecordManagerTest {
     }
 
     @Test
-    void ignoreTextMessageWhenRecordingDisabledGlobally() throws Exception {
-        Service activeService = ServiceFactory.createService("record", "Channel recording", Service.Status.DISABLED,
-                LocalDateTime.now(), Service.Status.INACTIVE);
+    void recordTextMessageWhenRecordingEnabledButGloballyDisabled() throws Exception {
+        ChannelService activeChannelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
+                Service.Status.ACTIVE, LocalDateTime.now(), "userId");
 
-        doReturn(activeService).when(serviceManager).findServiceByCode("record");
+        doReturn(Optional.of(activeChannelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
+        doReturn(new UserProfileResponse("User ID", "userId", "http://image", "status"))
+                .when(channelUserProfileCache)
+                .get(new ChannelUserProfileKey("channelId", "userId"));
 
         LocalDateTime messageDate = LocalDateTime.now();
+        ChannelRecord channelRecord = new ChannelRecord("channelId", "userId", "User ID", "text", messageDate,
+                "message");
         MessageEvent<TextMessageContent> textMessageEvent =
                 new MessageEvent<>("replyToken", new GroupSource("channelId", "userId"),
                         new TextMessageContent("id", "message"), messageDate.toInstant(ZoneOffset.UTC));
 
         channelRecordManager.recordEvent(textMessageEvent);
 
-        verify(channelServiceManager, never()).findChannelServiceByKey(any(ChannelServiceKey.class));
-        verify(channelUserProfileCache, never()).get(any(ChannelUserProfileKey.class));
-        verify(channelRecordDao, never()).insertChannelRecord(any(ChannelRecord.class));
+        verify(serviceManager, never()).findServiceByCode(anyString());
+        verify(channelRecordDao, times(1)).insertChannelRecord(channelRecord);
     }
 
     @Test
     void ignoreTextMessageWhenRecordingDisabledLocally() throws Exception {
-        Service activeService = ServiceFactory.createService("record", "Channel recording", Service.Status.ACTIVE,
-                LocalDateTime.now(), Service.Status.INACTIVE);
         ChannelService disabledChannelService = ChannelServiceFactory.createChannelServiceFactory(
                 "channelId", "record", Service.Status.DISABLED, LocalDateTime.now(), "userId");
 
-        doReturn(activeService).when(serviceManager).findServiceByCode("record");
         doReturn(Optional.of(disabledChannelService))
                 .when(channelServiceManager)
                 .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
@@ -510,12 +510,9 @@ class ChannelRecordManagerTest {
 
     @Test
     void ignoreTextMessageWhenRecordingInactive() throws Exception {
-        Service activeService = ServiceFactory.createService("record", "Channel recording", Service.Status.ACTIVE,
-                LocalDateTime.now(), Service.Status.INACTIVE);
         ChannelService inactiveChannelService = ChannelServiceFactory.createChannelServiceFactory(
                 "channelId", "record", Service.Status.INACTIVE, LocalDateTime.now(), "userId");
 
-        doReturn(activeService).when(serviceManager).findServiceByCode("record");
         doReturn(Optional.of(inactiveChannelService))
                 .when(channelServiceManager)
                 .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
