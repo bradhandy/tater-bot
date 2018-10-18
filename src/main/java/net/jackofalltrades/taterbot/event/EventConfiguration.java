@@ -13,7 +13,7 @@ class EventConfiguration {
     SimpleApplicationEventMulticaster createEventMulticaster() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setThreadNamePrefix("Event Processing Thread");
-        threadPoolTaskExecutor.setCorePoolSize(2);
+        threadPoolTaskExecutor.setCorePoolSize(1);
         threadPoolTaskExecutor.setMaxPoolSize(10);
         threadPoolTaskExecutor.initialize();
 

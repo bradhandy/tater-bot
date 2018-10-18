@@ -86,8 +86,7 @@ public class InitialDatabaseMigrationTest {
         Service recordingService = serviceManager.findServiceByCode(Service.RECORD_SERVICE_CODE);
 
         assertEquals("The service code did not match.", Service.RECORD_SERVICE_CODE, recordingService.getCode());
-        assertEquals("The service description did not match.",
-                "Keep a log of channel conversation for a period of time.", recordingService.getDescription());
+        assertEquals("The service description did not match.", "Channel Recording", recordingService.getDescription());
         assertEquals("The status does not match.", Service.Status.ACTIVE, recordingService.getStatus());
         assertTrue("The status date/time does not meet expectations.",
                 recordingService.getStatusDate().isAfter(expectedStatusDate));

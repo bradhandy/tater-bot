@@ -64,7 +64,7 @@
     <changeSet id="create-record-service" author="bhandy" dbms="h2,postgresql">
         <insert tableName="service">
             <column name="code" type="varchar" value="record" />
-            <column name="description" type="varchar" value="Keep a log of channel conversation for a period of time." />
+            <column name="description" type="varchar" value="Channel Recording" />
             <column name="status" type="varchar" value="active" />
             <column name="status_date" type="timestamp" valueComputed="current_timestamp" />
             <column name="initial_channel_status" type="varchar" value="inactive" />
