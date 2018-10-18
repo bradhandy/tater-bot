@@ -58,7 +58,10 @@ public final class EventContext {
 
     public static Optional<String> getUserId() {
         Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
-        return currentEvent.transform((event) -> event.getSource().getUserId());
+        if (currentEvent.isPresent()) {
+            return Optional.fromNullable(currentEvent.get().getSource().getUserId());
+        }
+        return Optional.absent();
     }
 
     public static Optional<LocalDateTime> getTimestamp() {
