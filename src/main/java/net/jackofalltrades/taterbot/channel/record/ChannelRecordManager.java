@@ -2,7 +2,6 @@ package net.jackofalltrades.taterbot.channel.record;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.Source;
