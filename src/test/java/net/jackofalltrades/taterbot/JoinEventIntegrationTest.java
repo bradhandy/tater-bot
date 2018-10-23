@@ -107,16 +107,6 @@ public class JoinEventIntegrationTest {
         assertEquals("The membership reason does not match.", "Invited", currentChannel.get().getMemberReason());
     }
 
-    private int getNumberOfChannelServices() {
-        return testDatabaseTemplate.queryForObject("select count(*) from channel_service where channel_id = ?",
-                (resultSet, rowNum) -> resultSet.getInt(1), "groupId");
-    }
-
-    private int getNumberOfServices() {
-        return testDatabaseTemplate
-                .queryForObject("select count(*) from service", (resultSet, rowNum) -> resultSet.getInt(1));
-    }
-
     @Test
     public void joiningChannelInsertsDataIntoChannelTableForRoomSource() throws Exception {
         JoinEvent joinEvent = new JoinEvent("reply", new RoomSource("userId", "groupId"),
@@ -143,6 +133,16 @@ public class JoinEventIntegrationTest {
         lineCallback.submit(joinEvent);
 
         assertEquals("There shouldn't be any channel services.", 0, getNumberOfChannelServices());
+    }
+
+    private int getNumberOfChannelServices() {
+        return testDatabaseTemplate.queryForObject("select count(*) from channel_service where channel_id = ?",
+                (resultSet, rowNum) -> resultSet.getInt(1), "groupId");
+    }
+
+    private int getNumberOfServices() {
+        return testDatabaseTemplate
+                .queryForObject("select count(*) from service", (resultSet, rowNum) -> resultSet.getInt(1));
     }
 
 }

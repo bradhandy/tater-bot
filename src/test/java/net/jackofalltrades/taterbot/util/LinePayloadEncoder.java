@@ -2,12 +2,12 @@ package net.jackofalltrades.taterbot.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.linecorp.bot.model.event.CallbackRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -29,7 +29,7 @@ public class LinePayloadEncoder {
 
     public String encodePayload(CallbackRequest callbackRequest) throws JsonProcessingException {
         return Base64.getEncoder().encodeToString(
-                Hashing.hmacSha256(channelSecret.getBytes(Charsets.UTF_8))
+                Hashing.hmacSha256(channelSecret.getBytes(StandardCharsets.UTF_8))
                         .hashBytes(objectMapper.writeValueAsBytes(callbackRequest))
                         .asBytes());
     }

@@ -14,6 +14,10 @@ public class ChannelRecordStopEvent extends ApplicationEvent {
         this.channelService = channelService;
     }
 
+    public ChannelService getChannelService() {
+        return channelService;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

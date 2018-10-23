@@ -64,6 +64,13 @@ dependencyManagement {
             entry "byte-buddy-agent"
         }
     }
+
+    // Ordering is important.  If the aws-java-sdk-bom is first, then the spring cloud framework will override the
+    // version with an older version.
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-aws:2.0.0.RELEASE"
+        mavenBom "com.amazonaws:aws-java-sdk-bom:1.11.431"
+    }
 }
 
 dependencies {
@@ -76,6 +83,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-jdbc") {
         exclude group: 'com.zaxxer', module: 'HikariCP'
     }
+    compile("org.springframework.cloud:spring-cloud-starter-aws")
 
     compile("org.slf4j:slf4j-api:1.7.25")
 

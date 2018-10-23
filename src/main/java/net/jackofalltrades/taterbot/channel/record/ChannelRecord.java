@@ -12,7 +12,7 @@ public class ChannelRecord {
     private final LocalDateTime messageTimestamp;
     private final String message;
 
-    public ChannelRecord(String channelId, String userId, String userDisplayName, String messageType,
+    ChannelRecord(String channelId, String userId, String userDisplayName, String messageType,
             LocalDateTime messageTimestamp, String message) {
         this.channelId = channelId;
         this.userId = userId;

@@ -29,13 +29,7 @@ class TaterBotCommandParserVisitor extends BotCommandParserBaseVisitor<Command> 
 
     @Override
     public Command visitRecord_command(BotCommandParser.Record_commandContext ctx) {
-        BotCommandParser.Record_actionContext recordActionContext =
-                ctx.getRuleContext(BotCommandParser.Record_actionContext.class, 0);
-        if (recordActionContext != null) {
-            return recordActionContext.getText().equals("help") ? retrieveCommand(RecordHelpCommand.NAME) : null;
-        }
-
-        return null;
+        return ctx.accept(new RecordCommandParserVisitor(applicationContext));
     }
 
     @Override
