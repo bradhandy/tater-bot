@@ -27,10 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -46,8 +44,6 @@ import java.util.concurrent.CompletableFuture;
 @SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
-@DirtiesContext
-@Transactional
 public class ChannelRecordIntegrationTest {
 
     @Rule
