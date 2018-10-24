@@ -23,16 +23,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
-                properties = "server.port=7551",
                 webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
+@DirtiesContext
+@Transactional
 public class TextMessageIntegrationTest {
 
     @Rule

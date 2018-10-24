@@ -7,7 +7,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
-import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.event.JoinEvent;
 import com.linecorp.bot.model.event.LeaveEvent;
 import com.linecorp.bot.model.event.source.GroupSource;
@@ -35,8 +34,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
-                properties = "server.port=7556",
-                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @DirtiesContext
 public class LeaveEventIntegrationTest {
