@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import java.time.Duration;
 
 /**
  * Submits CallbackRequests to the callback endpoint for the server.
@@ -28,7 +29,8 @@ public class LineCallback {
 
     @Autowired
     public LineCallback(WebTestClient webTestClient, LinePayloadEncoder linePayloadEncoder) {
-        this.webTestClient = webTestClient;
+        this.webTestClient =
+                webTestClient.mutateWith((builder, httpHandlerBuilder, connector) -> builder.responseTimeout(Duration.ofSeconds(120)));
         this.linePayloadEncoder = linePayloadEncoder;
     }
 
