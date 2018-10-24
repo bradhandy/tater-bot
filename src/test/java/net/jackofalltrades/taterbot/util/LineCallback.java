@@ -29,8 +29,7 @@ public class LineCallback {
 
     @Autowired
     public LineCallback(WebTestClient webTestClient, LinePayloadEncoder linePayloadEncoder) {
-        this.webTestClient =
-                webTestClient.mutateWith((builder, httpHandlerBuilder, connector) -> builder.responseTimeout(Duration.ofSeconds(120)));
+        this.webTestClient = webTestClient;
         this.linePayloadEncoder = linePayloadEncoder;
     }
 
