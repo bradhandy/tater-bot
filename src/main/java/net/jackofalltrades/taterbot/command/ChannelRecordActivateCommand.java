@@ -39,6 +39,10 @@ class ChannelRecordActivateCommand implements Command {
 
     private void processChannelRecordStart() {
         String channelId = EventContext.getGroupId().orNull();
+
+        // make sure this service exists for channels already joined.
+        channelServiceManager.addMissingServicesToChannel(channelId);
+
         ChannelService channelService = channelServiceManager
                 .findChannelServiceByKey(new ChannelServiceKey(channelId, Service.RECORD_SERVICE_CODE))
                 .orNull();

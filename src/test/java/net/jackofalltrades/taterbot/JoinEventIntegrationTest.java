@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ import java.util.List;
 @SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
+@DirtiesContext
 public class JoinEventIntegrationTest {
 
     @Rule

@@ -23,8 +23,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +35,8 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
+@DirtiesContext
+@Transactional
 public class InitialDatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =

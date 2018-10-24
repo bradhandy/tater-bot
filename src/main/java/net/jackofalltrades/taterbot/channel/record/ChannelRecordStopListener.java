@@ -59,7 +59,7 @@ class ChannelRecordStopListener implements ApplicationListener<ChannelRecordStop
             channelRecordDao.processChannelRecords(channelService.getChannelId(), channelService.getStatusDate(),
                     endTimestamp, new TextFileExporterChannelRecordProcessor(outputStream));
         } catch (IOException e) {
-
+            LOG.error("Could not create transcript.", e);
         }
 
         TextMessage textMessage = new TextMessage("Download the transcript @ " + baseDownloadUrl + transcriptFileName);

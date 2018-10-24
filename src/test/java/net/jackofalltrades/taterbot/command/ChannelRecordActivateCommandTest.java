@@ -31,11 +31,14 @@ import java.time.LocalDateTime;
 @ExtendWith(MockitoExtension.class)
 class ChannelRecordActivateCommandTest {
 
-    @Mock private LineMessagingClient lineMessagingClient;
+    @Mock
+    private LineMessagingClient lineMessagingClient;
 
-    @Mock private ChannelServiceManager channelServiceManager;
+    @Mock
+    private ChannelServiceManager channelServiceManager;
 
-    @Mock private ChannelRecordManager channelRecordManager;
+    @Mock
+    private ChannelRecordManager channelRecordManager;
 
     private ChannelRecordActivateCommand channelServiceActivateCommand;
 
@@ -62,6 +65,7 @@ class ChannelRecordActivateCommandTest {
 
         assertTextReplyForClient(lineMessagingClient, "replyToken1", "'record' service is already active.");
         verify(channelRecordManager, never()).startChannelRecordService("channelId", "userId");
+        verify(channelServiceManager, times(1)).addMissingServicesToChannel("channelId");
     }
 
     @Test
@@ -81,6 +85,7 @@ class ChannelRecordActivateCommandTest {
         assertTextReplyForClient(lineMessagingClient, "replyToken2",
                 "Recording active. Use 'taterbot record stop' to terminate recording.");
         verify(channelRecordManager, times(1)).startChannelRecordService("channelId", "userId");
+        verify(channelServiceManager, times(1)).addMissingServicesToChannel("channelId");
     }
 
     @Test
@@ -105,6 +110,7 @@ class ChannelRecordActivateCommandTest {
 
         assertTextReplyForClient(lineMessagingClient, "replyToken3", "'record' has been disabled for this channel.");
         verify(channelRecordManager, times(1)).startChannelRecordService("channelId", "userId");
+        verify(channelServiceManager, times(1)).addMissingServicesToChannel("channelId");
     }
 
     @Test
@@ -116,6 +122,8 @@ class ChannelRecordActivateCommandTest {
         verify(channelServiceManager, never()).findChannelServiceByKey(any(ChannelServiceKey.class));
         verify(channelRecordManager, never()).startChannelRecordService(anyString(), anyString());
         verify(lineMessagingClient, never()).replyMessage(any(ReplyMessage.class));
+        verify(channelServiceManager, never()).addMissingServicesToChannel("channelId");
+
     }
 
 }

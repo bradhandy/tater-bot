@@ -5,6 +5,7 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
+import net.jackofalltrades.taterbot.channel.record.ChannelRecordManager;
 import net.jackofalltrades.taterbot.command.BotCommandLexer;
 import net.jackofalltrades.taterbot.command.BotCommandParser;
 import net.jackofalltrades.taterbot.command.BotCommandParserVisitor;
@@ -17,14 +18,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TextMessageEventHandler {
 
     private final BotCommandParserVisitor<Command> commandParserVisitor;
+    private final ChannelRecordManager channelRecordManager;
 
     @Autowired
-    public TextMessageEventHandler(BotCommandParserVisitor<Command> commandParserVisitor) {
+    public TextMessageEventHandler(BotCommandParserVisitor<Command> commandParserVisitor,
+            ChannelRecordManager channelRecordManager) {
         this.commandParserVisitor = commandParserVisitor;
+        this.channelRecordManager = channelRecordManager;
     }
 
     @EventMapping
     public void handleTextEvent(MessageEvent<TextMessageContent> textMessageEvent) {
+        channelRecordManager.recordEvent(textMessageEvent);
         EventContext.doWithEvent(textMessageEvent, this::processCommand);
     }
 
