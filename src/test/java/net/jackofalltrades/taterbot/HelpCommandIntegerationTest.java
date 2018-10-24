@@ -38,7 +38,8 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                properties = "server.port=7554",
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @DirtiesContext
 public class HelpCommandIntegerationTest {

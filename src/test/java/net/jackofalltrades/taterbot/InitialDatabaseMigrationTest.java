@@ -33,7 +33,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class,
+                webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @DirtiesContext
 @Transactional

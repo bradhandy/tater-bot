@@ -35,7 +35,8 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                properties = "server.port=7556",
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @DirtiesContext
 public class LeaveEventIntegrationTest {
