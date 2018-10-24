@@ -16,7 +16,7 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - ./gradlew check
+  - ./gradlew --stacktrace --debug check
   - ./gradlew jacocoTestReport
 
 after_success:
