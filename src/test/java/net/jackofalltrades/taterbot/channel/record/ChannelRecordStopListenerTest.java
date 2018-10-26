@@ -141,6 +141,7 @@ class ChannelRecordStopListenerTest {
         assertPushMessageForClient(lineMessagingClient, channelService.getChannelId(),
                 "Download the transcript @ https://download/" + expectedFileName);
 
+        verify(outputStream).write(new byte[]{(byte) 0xef, (byte) 0xbb, (byte) 0xbf});
         verify(outputStream).write("[user name unavailable]   - message\n".getBytes(StandardCharsets.UTF_8));
         verify(outputStream).write("displayName               - msg\n".getBytes(StandardCharsets.UTF_8));
         verify(outputStream).close();

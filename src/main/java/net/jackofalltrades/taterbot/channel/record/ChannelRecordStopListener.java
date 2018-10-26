@@ -28,6 +28,7 @@ import java.time.ZoneOffset;
 class ChannelRecordStopListener implements ApplicationListener<ChannelRecordStopEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChannelRecordStopListener.class);
+    private static final byte[] UTF8_BOM = new byte[]{(byte) 0xef, (byte) 0xbb, (byte) 0xbf};
 
     private final LineMessagingClient lineMessagingClient;
     private final ResourceLoader resourceLoader;
@@ -75,6 +76,8 @@ class ChannelRecordStopListener implements ApplicationListener<ChannelRecordStop
 
         private final OutputStream outputStream;
 
+        private int recordsProcessed = 0;
+
         private TextFileExporterChannelRecordProcessor(OutputStream outputStream) {
             this.outputStream = outputStream;
         }
@@ -82,6 +85,10 @@ class ChannelRecordStopListener implements ApplicationListener<ChannelRecordStop
         @Override
         public void processChannelRecord(ChannelRecord channelRecord) {
             try {
+                if (recordsProcessed++ == 0) {
+                    outputStream.write(UTF8_BOM);
+                }
+
                 String record = String.format("%-25s - %s\n",
                         Optional.fromNullable(channelRecord.getUserDisplayName()).or("[user name unavailable]"),
                         channelRecord.getMessage());
