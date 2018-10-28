@@ -49,15 +49,8 @@ public class HelpCommandIntegerationTest {
     @Autowired
     private LineCallback lineCallback;
 
-    @Autowired
-    private LinePayloadEncoder linePayloadEncoder;
-
-    private LineCallback lineCallback;
-
-    @Before
-    public void setUpLineCallback() {
-        lineCallback = new LineCallback(webTestClient, linePayloadEncoder);
-    }
+    @MockBean
+    private LineMessagingClient lineMessagingClient;
 
     @Before
     @After

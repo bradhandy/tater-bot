@@ -40,6 +40,9 @@ public class TextMessageIntegrationTest {
     @Rule
     public OutputCapture outputCapture = new OutputCapture();
 
+    @Autowired
+    private LineCallback lineCallback;
+
     @MockBean
     private LineMessagingClient lineMessagingClient;
 
