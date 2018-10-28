@@ -16,7 +16,6 @@ import net.jackofalltrades.taterbot.channel.Channel;
 import net.jackofalltrades.taterbot.channel.ChannelHistory;
 import net.jackofalltrades.taterbot.channel.ChannelManager;
 import net.jackofalltrades.taterbot.util.LineCallback;
-import net.jackofalltrades.taterbot.util.LinePayloadEncoder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,7 +28,6 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -46,23 +44,13 @@ public class JoinEventIntegrationTest {
     public OutputCapture outputCapture = new OutputCapture();
 
     @Autowired
+    private LineCallback lineCallback;
+
+    @Autowired
     private JdbcTemplate testDatabaseTemplate;
 
     @Autowired
     private ChannelManager channelManager;
-
-    @Autowired
-    private WebTestClient webTestClient;
-
-    @Autowired
-    private LinePayloadEncoder linePayloadEncoder;
-
-    private LineCallback lineCallback;
-
-    @Before
-    public void setUpLineCallback() {
-        lineCallback = new LineCallback(webTestClient, linePayloadEncoder);
-    }
 
     @Before
     @After

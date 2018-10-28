@@ -19,7 +19,6 @@ import com.linecorp.bot.model.message.TextMessage;
 import net.jackofalltrades.taterbot.command.annotation.ChannelCommand;
 import net.jackofalltrades.taterbot.command.annotation.UserCommand;
 import net.jackofalltrades.taterbot.util.LineCallback;
-import net.jackofalltrades.taterbot.util.LinePayloadEncoder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +31,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import java.lang.annotation.Annotation;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -48,11 +46,8 @@ public class HelpCommandIntegerationTest {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @MockBean
-    private LineMessagingClient lineMessagingClient;
-
     @Autowired
-    private WebTestClient webTestClient;
+    private LineCallback lineCallback;
 
     @Autowired
     private LinePayloadEncoder linePayloadEncoder;
