@@ -15,7 +15,9 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import net.jackofalltrades.taterbot.util.LineCallback;
+import net.jackofalltrades.taterbot.util.LinePayloadEncoder;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,7 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -40,14 +43,24 @@ public class TextMessageIntegrationTest {
     @Rule
     public OutputCapture outputCapture = new OutputCapture();
 
-    @Autowired
-    private LineCallback lineCallback;
-
     @MockBean
     private LineMessagingClient lineMessagingClient;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Autowired
+    private LinePayloadEncoder linePayloadEncoder;
+
+    private LineCallback lineCallback;
+
+    @Before
+    public void setUpLineCallback() {
+        lineCallback = new LineCallback(webTestClient, linePayloadEncoder);
+    }
 
     @After
     public void assertNothingExistsInChannelRecord() {

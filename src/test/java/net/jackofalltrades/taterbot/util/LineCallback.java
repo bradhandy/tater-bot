@@ -15,19 +15,13 @@ import java.time.Duration;
 /**
  * Submits CallbackRequests to the callback endpoint for the server.
  *
- * The bean must be configured in the &quot;prototype&quot;, because a singleton will be wired up with an invalid
- * WebTestClient.  Prototype instances will be wired up when used, so the correct WebTestClient will be used.
- *
  * @author bhandy
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LineCallback {
 
     private final WebTestClient webTestClient;
     private final LinePayloadEncoder linePayloadEncoder;
 
-    @Autowired
     public LineCallback(WebTestClient webTestClient, LinePayloadEncoder linePayloadEncoder) {
         this.webTestClient = webTestClient;
         this.linePayloadEncoder = linePayloadEncoder;

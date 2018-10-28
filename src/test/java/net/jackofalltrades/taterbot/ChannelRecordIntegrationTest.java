@@ -16,6 +16,7 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import net.jackofalltrades.taterbot.util.LineCallback;
+import net.jackofalltrades.taterbot.util.LinePayloadEncoder;
 import net.jackofalltrades.taterbot.util.WaitCapableSupplier;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -52,14 +54,24 @@ public class ChannelRecordIntegrationTest {
     @Rule
     public OutputCapture outputCapture = new OutputCapture();
 
-    @Autowired
-    private LineCallback lineCallback;
-
     @MockBean
     private LineMessagingClient lineMessagingClient;
 
     @Autowired
     private JdbcTemplate testDatabaseTemplate;
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Autowired
+    private LinePayloadEncoder linePayloadEncoder;
+
+    private LineCallback lineCallback;
+
+    @Before
+    public void setUpLineCallback() {
+        lineCallback = new LineCallback(webTestClient, linePayloadEncoder);
+    }
 
     @Before
     public void resetLineMessagingClientInvocations() {
