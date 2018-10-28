@@ -34,7 +34,7 @@ import java.time.ZoneOffset;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(properties = "server.port = 0", locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
 public class RecordHelpCommandIntegrationTest {
 
