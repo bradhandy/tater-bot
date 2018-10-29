@@ -8,6 +8,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
  * @author bhandy
  */
 @Component
+@Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LineCallback {
 
