@@ -43,7 +43,7 @@ import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
+@SpringBootTest(classes = ChannelRecordIntegrationTest.SpringBootConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
@@ -154,6 +154,11 @@ public class ChannelRecordIntegrationTest {
                 "Download the transcript @ http://transcripts/" + transcriptPath.getFileName().toString());
         assertThat("Stopping the record session should create a file.", transcriptPath.getFileName().toString(),
                 Matchers.containsString("groupId"));
+    }
+
+    @TaterBotCommandIntegrationTestConfiguration
+    static class SpringBootConfiguration {
+
     }
 
 }

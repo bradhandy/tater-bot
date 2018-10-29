@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
+@SpringBootTest(classes = RecordHelpCommandIntegrationTest.SpringBootConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
@@ -105,5 +105,9 @@ public class RecordHelpCommandIntegrationTest {
         return message.toString();
     }
 
+    @TaterBotCommandIntegrationTestConfiguration
+    static class SpringBootConfiguration {
+
+    }
 
 }

@@ -34,7 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
+@SpringBootTest(classes = JoinEventIntegrationTest.SpringBootConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
@@ -145,6 +145,11 @@ public class JoinEventIntegrationTest {
     private int getNumberOfServices() {
         return testDatabaseTemplate
                 .queryForObject("select count(*) from service", (resultSet, rowNum) -> resultSet.getInt(1));
+    }
+
+    @TaterBotCommandIntegrationTestConfiguration
+    static class SpringBootConfiguration {
+
     }
 
 }

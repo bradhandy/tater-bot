@@ -3,7 +3,13 @@ package net.jackofalltrades.taterbot;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Configuration
 @ComponentScan(
         basePackages = {
@@ -14,6 +20,6 @@ import org.springframework.context.annotation.Configuration;
                 "net.jackofalltrades.taterbot.util"
         })
 @EnableAutoConfiguration
-class TaterBotCommandIntegrationConfiguration {
+public @interface TaterBotCommandIntegrationTestConfiguration {
 
 }

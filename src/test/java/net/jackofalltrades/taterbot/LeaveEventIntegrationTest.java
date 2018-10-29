@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
+@SpringBootTest(classes = LeaveEventIntegrationTest.SpringBootConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
@@ -101,6 +101,11 @@ public class LeaveEventIntegrationTest {
         assertTrue("The channel record should exist.", currentChannel.isPresent());
         assertFalse("The channel should have been vacated.", currentChannel.get().isMember());
         assertEquals("The membership reason does not match.", "Kicked", currentChannel.get().getMemberReason());
+    }
+
+    @TaterBotCommandIntegrationTestConfiguration
+    static class SpringBootConfiguration {
+
     }
 
 }
