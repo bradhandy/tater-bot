@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.linecorp.bot.model.event.CallbackRequest;
 import com.linecorp.bot.model.event.Event;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -29,9 +30,9 @@ public class LineCallback {
     private final int localServerPort;
 
     @Autowired
-    public LineCallback(WebTestClient webTestClient, LinePayloadEncoder linePayloadEncoder,
-            @LocalServerPort int localServerPort) {
-        this.webTestClient = webTestClient;
+    public LineCallback(FactoryBean<WebTestClient> webTestClient, LinePayloadEncoder linePayloadEncoder,
+            @LocalServerPort int localServerPort) throws Exception {
+        this.webTestClient = webTestClient.getObject();
         this.linePayloadEncoder = linePayloadEncoder;
         this.localServerPort = localServerPort;
     }
