@@ -37,6 +37,7 @@ import java.util.Map;
                 webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @Transactional
+@DirtiesContext
 public class InitialDatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =

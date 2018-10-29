@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import java.time.Duration;
 
 /**
  * Submits CallbackRequests to the callback endpoint for the server.
