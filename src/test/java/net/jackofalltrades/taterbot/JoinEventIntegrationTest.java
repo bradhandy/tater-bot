@@ -34,7 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ChannelMembershipIntegrationConfiguration.class,
+@SpringBootTest(classes = TaterBotCommandIntegrationConfiguration.class,
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureWebTestClient
