@@ -97,7 +97,6 @@ dependencies {
         exclude group: 'junit', module: 'junit'
         exclude group: 'org.mockito', module: 'mockito-core'
     }
-    testCompile("org.springframework.boot:spring-boot-starter-webflux")
 
     testCompile("org.mockito:mockito-core:2.19.6")
     testCompile("org.mockito:mockito-junit-jupiter:2.19.6")

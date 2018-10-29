@@ -34,4 +34,8 @@ public class LinePayloadEncoder {
                         .asBytes());
     }
 
+    public String formatPayload(CallbackRequest callbackRequest) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(callbackRequest);
+    }
+
 }

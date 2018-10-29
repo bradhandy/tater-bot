@@ -25,10 +25,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.lang.annotation.Annotation;
@@ -37,10 +37,9 @@ import java.time.ZoneOffset;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = HelpCommandIntegerationTest.SpringBootConfiguration.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = HelpCommandIntegerationTest.SpringBootConfiguration.class)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
-@DirtiesContext
+@AutoConfigureMockMvc
 public class HelpCommandIntegerationTest {
 
     @Autowired
