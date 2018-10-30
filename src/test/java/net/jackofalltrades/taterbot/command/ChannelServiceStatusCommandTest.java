@@ -1,6 +1,5 @@
 package net.jackofalltrades.taterbot.command;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -14,7 +13,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
-import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import net.jackofalltrades.taterbot.channel.profile.ChannelUserProfileKey;
 import net.jackofalltrades.taterbot.service.ChannelService;
@@ -25,10 +23,10 @@ import net.jackofalltrades.taterbot.service.Service;
 import net.jackofalltrades.taterbot.service.ServiceFactory;
 import net.jackofalltrades.taterbot.service.ServiceManager;
 import net.jackofalltrades.taterbot.util.EventTestingUtil;
+import net.jackofalltrades.taterbot.util.ReplyMessageAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
@@ -86,17 +84,9 @@ class ChannelServiceStatusCommandTest {
 
         channelServiceStatusCommand.execute();
 
-        ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
-        verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
-
-        ReplyMessage replyMessage = replyMessageCaptor.getValue();
-        assertEquals("replyToken", replyMessage.getReplyToken(), "The reply token does not match.");
-        assertEquals(1, replyMessage.getMessages().size(), "There should be one message.");
-
-        TextMessage textMessage = (TextMessage) replyMessage.getMessages().get(0);
-        assertEquals(String.format("'record' service is active as of %s. (changed by @displayName)",
-                DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
-                "The message does not match.");
+        ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
+                String.format("'record' service is active as of %s. (changed by @displayName)",
+                        DATE_TIME_FORMATTER.format(channelServiceStatusDate)));
 
         verify(serviceManager, times(1)).findServiceByCode("record");
         verify(channelServiceManager, times(1)).findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
@@ -122,17 +112,9 @@ class ChannelServiceStatusCommandTest {
 
         channelServiceStatusCommand.execute();
 
-        ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
-        verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
-
-        ReplyMessage replyMessage = replyMessageCaptor.getValue();
-        assertEquals("replyToken", replyMessage.getReplyToken(), "The reply token does not match.");
-        assertEquals(1, replyMessage.getMessages().size(), "There should be one message.");
-
-        TextMessage textMessage = (TextMessage) replyMessage.getMessages().get(0);
-        assertEquals(String.format("'record' service is inactive as of %s.",
-                DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
-                "The message does not match.");
+        ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
+                String.format("'record' service is inactive as of %s.",
+                        DATE_TIME_FORMATTER.format(channelServiceStatusDate)));
 
         verify(serviceManager, times(1)).findServiceByCode(anyString());
         verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
@@ -161,17 +143,9 @@ class ChannelServiceStatusCommandTest {
 
         channelServiceStatusCommand.execute();
 
-        ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
-        verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
-
-        ReplyMessage replyMessage = replyMessageCaptor.getValue();
-        assertEquals("replyToken", replyMessage.getReplyToken(), "The reply token does not match.");
-        assertEquals(1, replyMessage.getMessages().size(), "There should be one message.");
-
-        TextMessage textMessage = (TextMessage) replyMessage.getMessages().get(0);
-        assertEquals(String.format("'record' service is inactive as of %s.",
-                DATE_TIME_FORMATTER.format(channelServiceStatusDate)), textMessage.getText(),
-                "The message does not match.");
+        ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
+                String.format("'record' service is inactive as of %s.",
+                        DATE_TIME_FORMATTER.format(channelServiceStatusDate)));
 
         verify(serviceManager, times(1)).findServiceByCode(anyString());
         verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
@@ -193,7 +167,7 @@ class ChannelServiceStatusCommandTest {
     @Test
     void errorMessageShouldPrintWhenInvalidService() {
         EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id",
-                "service invalid status");
+                "service status invalid");
 
         doReturn(Optional.<ChannelService>absent())
                 .when(channelServiceManager)
@@ -202,19 +176,25 @@ class ChannelServiceStatusCommandTest {
         channelServiceStatusCommand.setServiceName("invalid");
         channelServiceStatusCommand.execute();
 
-        ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
-        verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
-
-        ReplyMessage replyMessage = replyMessageCaptor.getValue();
-        assertEquals("replyToken", replyMessage.getReplyToken(), "The reply token does not match.");
-        assertEquals(1, replyMessage.getMessages().size(), "There should be one message.");
-
-        TextMessage textMessage = (TextMessage) replyMessage.getMessages().get(0);
-        assertEquals("'invalid' is an invalid service for this channel.", textMessage.getText(),
-                "The message does not match.");
+        ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
+                "'invalid' is an invalid service for this channel.");
 
         verify(serviceManager, never()).findServiceByCode(anyString());
         verify(channelServiceManager, times(1)).findChannelServiceByKey(any(ChannelServiceKey.class));
+        verify(channelUserProfileCache, never()).getUnchecked(any(ChannelUserProfileKey.class));
+    }
+
+    @Test
+    void errorMessageShouldNotPrintWhenCommandIsIncorrectlyFormatted() {
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id",
+                "service status invalid");
+
+        channelServiceStatusCommand.setServiceName(null);
+        channelServiceStatusCommand.execute();
+
+        verify(channelServiceManager, never()).findChannelServiceByKey(any(ChannelServiceKey.class));
+        verify(lineMessagingClient, never()).replyMessage(any(ReplyMessage.class));
+        verify(serviceManager, never()).findServiceByCode(anyString());
         verify(channelUserProfileCache, never()).getUnchecked(any(ChannelUserProfileKey.class));
     }
 

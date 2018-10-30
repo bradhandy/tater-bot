@@ -53,15 +53,16 @@ class ChannelServiceStatusCommand implements Command, ServiceNameAware {
             return;
         }
 
-        String channelId = EventContext.getGroupId().orNull();
+        if (Optional.fromNullable(serviceName).isPresent()) {
+            String channelId = EventContext.getGroupId().orNull();
+            Optional<ChannelService> optionalChannelService =
+                    channelServiceManager.findChannelServiceByKey(new ChannelServiceKey(channelId, serviceName));
+            String channelServiceStatusMessage = optionalChannelService.transform(this::createChannelServiceStatusMessage)
+                    .or(String.format("'%s' is an invalid service for this channel.", serviceName));
 
-        Optional<ChannelService> optionalChannelService =
-                channelServiceManager.findChannelServiceByKey(new ChannelServiceKey(channelId, serviceName));
-        String channelServiceStatusMessage = optionalChannelService.transform(this::createChannelServiceStatusMessage)
-                        .or(String.format("'%s' is an invalid service for this channel.", serviceName));
-
-        lineMessagingClient.replyMessage(
-                new ReplyMessage(EventContext.getReplyToken().orNull(), new TextMessage(channelServiceStatusMessage)));
+            lineMessagingClient.replyMessage(
+                    new ReplyMessage(EventContext.getReplyToken().orNull(), new TextMessage(channelServiceStatusMessage)));
+        }
     }
 
     private String createChannelServiceStatusMessage(ChannelService channelService) {
