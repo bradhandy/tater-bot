@@ -1,18 +1,14 @@
 package net.jackofalltrades.taterbot;
 
-import static net.jackofalltrades.taterbot.util.EventTestingUtil.createGroupSourcedTextMessageEvent;
+import static net.jackofalltrades.taterbot.util.EventTestingUtil.createGroupSourcedStickerMessageEvent;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
-import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.event.message.StickerMessageContent;
 import net.jackofalltrades.taterbot.util.DatabaseAssertions;
 import net.jackofalltrades.taterbot.util.LineCallback;
 import org.junit.After;
@@ -28,10 +24,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TextMessageIntegrationTest.SpringBootConfiguration.class)
+@SpringBootTest(classes = StickerMessageIntegrationTest.SpringBootConfiguration.class)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureMockMvc
-public class TextMessageIntegrationTest {
+public class StickerMessageIntegrationTest {
 
     @Rule
     public OutputCapture outputCapture = new OutputCapture();
@@ -51,27 +47,15 @@ public class TextMessageIntegrationTest {
     }
 
     @Test
-    public void textMessagesAreSupported() throws JsonProcessingException {
-        MessageEvent<TextMessageContent> textMessageEvent = createGroupSourcedTextMessageEvent("replyTo", "groupId",
-                "userId", "id", "taterbot help");
+    public void stickerMessagesAreSupported() throws JsonProcessingException {
+        MessageEvent<StickerMessageContent> stickerMessageEvent = createGroupSourcedStickerMessageEvent("replyTo",
+                "groupId", "userId", "id");
 
         outputCapture.expect(not(containsString("UnsupportedOperationException")));
 
-        lineCallback.submit(textMessageEvent);
+        lineCallback.submit(stickerMessageEvent);
 
-        verify(lineMessagingClient, times(1)).replyMessage(any(ReplyMessage.class));
-    }
-
-    @Test
-    public void unsupportedMessageProducesNoReply() throws JsonProcessingException {
-        MessageEvent<TextMessageContent> textMessageEvent = createGroupSourcedTextMessageEvent("replyTo", "groupId",
-                "userId", "id", "help");
-
-        outputCapture.expect(not(containsString("UnsupportedOperationException")));
-
-        lineCallback.submit(textMessageEvent);
-
-        verifyNoMoreInteractions(lineMessagingClient);
+        verifyZeroInteractions(lineMessagingClient);
     }
 
     @TaterBotCommandIntegrationTestConfiguration

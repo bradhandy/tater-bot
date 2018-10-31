@@ -1,8 +1,11 @@
 package net.jackofalltrades.taterbot.channel.record;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import com.google.common.cache.LoadingCache;
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.MessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.Source;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -15,6 +18,7 @@ import net.jackofalltrades.taterbot.service.Service;
 import net.jackofalltrades.taterbot.service.ServiceDisabledException;
 import net.jackofalltrades.taterbot.service.ServiceManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -104,18 +108,33 @@ public class ChannelRecordManager {
         }
     }
 
-    public void recordEvent(MessageEvent<TextMessageContent> textMessageEvent) {
-        Source source = textMessageEvent.getSource();
+    public void recordEvent(MessageEvent<?> messageEvent) {
+        Source source = messageEvent.getSource();
         String channelId = source.getSenderId();
         if (recordingServiceIsEnabled(channelId)) {
+            MessageContent messageContent = messageEvent.getMessage();
+
+            Supplier<String> messageSupplier = messageContent::getId;
+            if (messageContent instanceof TextMessageContent) {
+                messageSupplier = ((TextMessageContent) messageContent)::getText;
+            }
+
+            String typeName = identifyMessageType(messageContent);
             String userId = source.getUserId();
-            Optional<UserProfileResponse> userProfileResponse = retrieveUserProfileInChannel(channelId, userId);
-            ChannelRecord channelRecord = new ChannelRecord(channelId, userId,
-                    userProfileResponse.transform((profileResponse) -> profileResponse.getDisplayName()).orNull(),
-                    "text", LocalDateTime.ofInstant(textMessageEvent.getTimestamp(), ZoneOffset.UTC),
-                    textMessageEvent.getMessage().getText());
+            String userDisplayName = retrieveUserProfileInChannel(channelId, userId)
+                    .transform((profileResponse) -> profileResponse.getDisplayName())
+                    .orNull();
+            ChannelRecord channelRecord = new ChannelRecord(channelId, userId, userDisplayName, typeName,
+                    LocalDateTime.ofInstant(messageEvent.getTimestamp(), ZoneOffset.UTC), messageSupplier.get());
             channelRecordDao.insertChannelRecord(channelRecord);
         }
+    }
+
+    private String identifyMessageType(MessageContent messageContent) {
+        JsonTypeName jsonTypeName = AnnotationUtils.findAnnotation(messageContent.getClass(), JsonTypeName.class);
+        return Optional.fromNullable(jsonTypeName)
+                .transform(annotation -> annotation.value())
+                .or("unknown");
     }
 
     private boolean recordingServiceIsEnabled(String channelId) {

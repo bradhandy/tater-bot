@@ -17,7 +17,6 @@ import org.springframework.core.io.WritableResource;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -89,9 +88,11 @@ class ChannelRecordStopListener implements ApplicationListener<ChannelRecordStop
                     outputStream.write(UTF8_BOM);
                 }
 
+                String message = channelRecord.getMessageType().equals("text") ? channelRecord.getMessage()
+                        : String.format("(%s)", channelRecord.getMessageType());
                 String record = String.format("%-25s - %s\n",
                         Optional.fromNullable(channelRecord.getUserDisplayName()).or("[user name unavailable]"),
-                        channelRecord.getMessage());
+                        message);
                 outputStream.write(record.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
 

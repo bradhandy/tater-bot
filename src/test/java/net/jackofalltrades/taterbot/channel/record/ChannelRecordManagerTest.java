@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.ImageMessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -523,6 +524,51 @@ class ChannelRecordManagerTest {
                         new TextMessageContent("id", "message"), messageDate.toInstant(ZoneOffset.UTC));
 
         channelRecordManager.recordEvent(textMessageEvent);
+
+        verify(channelUserProfileCache, never()).get(any(ChannelUserProfileKey.class));
+        verify(channelRecordDao, never()).insertChannelRecord(any(ChannelRecord.class));
+    }
+
+    @Test
+    void recordNonTextMessagesWhenRecordingActive() throws Exception {
+        ChannelService activeChannelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
+                Service.Status.ACTIVE, LocalDateTime.now(), "userId");
+
+        doReturn(Optional.of(activeChannelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
+        doReturn(new UserProfileResponse("User ID", "userId", "http://image", "status"))
+                .when(channelUserProfileCache)
+                .get(new ChannelUserProfileKey("channelId", "userId"));
+
+        LocalDateTime messageDate = LocalDateTime.now();
+        ChannelRecord channelRecord = new ChannelRecord("channelId", "userId", "User ID", "image", messageDate,
+                "imageMessageId");
+        MessageEvent<ImageMessageContent> imageMessageEvent =
+                new MessageEvent<>("replyToken", new GroupSource("channelId", "userId"),
+                        new ImageMessageContent("imageMessageId"), messageDate.toInstant(ZoneOffset.UTC));
+
+        channelRecordManager.recordEvent(imageMessageEvent);
+
+        verify(serviceManager, never()).findServiceByCode(anyString());
+        verify(channelRecordDao, times(1)).insertChannelRecord(channelRecord);
+    }
+
+    @Test
+    void ignoreNonTextMessagesWhenRecordingInactive() throws Exception {
+        ChannelService inactiveChannelService = ChannelServiceFactory.createChannelServiceFactory(
+                "channelId", "record", Service.Status.INACTIVE, LocalDateTime.now(), "userId");
+
+        doReturn(Optional.of(inactiveChannelService))
+                .when(channelServiceManager)
+                .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
+
+        LocalDateTime messageDate = LocalDateTime.now();
+        MessageEvent<ImageMessageContent> imageMessageEvent =
+                new MessageEvent<>("replyToken", new GroupSource("channelId", "userId"),
+                        new ImageMessageContent("imageMessageId"), messageDate.toInstant(ZoneOffset.UTC));
+
+        channelRecordManager.recordEvent(imageMessageEvent);
 
         verify(channelUserProfileCache, never()).get(any(ChannelUserProfileKey.class));
         verify(channelRecordDao, never()).insertChannelRecord(any(ChannelRecord.class));

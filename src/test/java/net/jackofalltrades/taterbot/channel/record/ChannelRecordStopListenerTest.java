@@ -1,8 +1,7 @@
 package net.jackofalltrades.taterbot.channel.record;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.jackofalltrades.taterbot.util.ReplyMessageAssertions.assertPushMessageForClient;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
@@ -36,7 +35,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -118,7 +116,10 @@ class ChannelRecordStopListenerTest {
     void fileShouldHaveContent() throws IOException {
         List<ChannelRecord> channelRecords = Lists.newArrayList(
                 new ChannelRecord("channelId", "userId", null, "text", LocalDateTime.now(), "message"),
-                new ChannelRecord("channelId", "resolvedUserId", "displayName", "text", LocalDateTime.now(), "msg"));
+                new ChannelRecord("channelId", "resolvedUserId", "displayName", "text", LocalDateTime.now(), "msg"),
+                new ChannelRecord("channelId", "resolvedUserId", "displayName", "image", LocalDateTime.now(), "id"),
+                new ChannelRecord("channelId", "userId", null, "sticker", LocalDateTime.now(),
+                        "id;packageId;stickerId"));
 
         LocalDateTime channelServiceStatusTime = LocalDateTime.now().minus(10, ChronoUnit.MINUTES);
         ChannelService channelService = ChannelServiceFactory.createChannelServiceFactory("channelId", "record",
@@ -142,8 +143,10 @@ class ChannelRecordStopListenerTest {
                 "Download the transcript @ https://download/" + expectedFileName);
 
         verify(outputStream).write(new byte[]{(byte) 0xef, (byte) 0xbb, (byte) 0xbf});
-        verify(outputStream).write("[user name unavailable]   - message\n".getBytes(StandardCharsets.UTF_8));
-        verify(outputStream).write("displayName               - msg\n".getBytes(StandardCharsets.UTF_8));
+        verify(outputStream).write("[user name unavailable]   - message\n".getBytes(UTF_8));
+        verify(outputStream).write("displayName               - msg\n".getBytes(UTF_8));
+        verify(outputStream).write("displayName               - (image)\n".getBytes(UTF_8));
+        verify(outputStream).write("[user name unavailable]   - (sticker)\n".getBytes(UTF_8));
         verify(outputStream).close();
     }
 

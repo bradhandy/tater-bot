@@ -1,5 +1,7 @@
 package net.jackofalltrades.taterbot;
 
+import static net.jackofalltrades.taterbot.util.EventTestingUtil.createGroupSourcedImageMessageEvent;
+import static net.jackofalltrades.taterbot.util.EventTestingUtil.createGroupSourcedTextMessageEvent;
 import static net.jackofalltrades.taterbot.util.ReplyMessageAssertions.assertPushMessageForClient;
 import static net.jackofalltrades.taterbot.util.ReplyMessageAssertions.assertTextReplyForClient;
 import static org.junit.Assert.assertNotNull;
@@ -12,8 +14,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.ImageMessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import net.jackofalltrades.taterbot.util.LineCallback;
 import net.jackofalltrades.taterbot.util.WaitCapableSupplier;
@@ -38,8 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 
 @RunWith(SpringRunner.class)
@@ -107,11 +107,8 @@ public class ChannelRecordIntegrationTest {
 
     @Test
     public void channelRecordServiceWillRecordMessages() throws Exception {
-        GroupSource groupSource = new GroupSource("groupId", "userId");
-        MessageEvent<TextMessageContent> textMessageEvent =
-                new MessageEvent<>("replyTo", groupSource,
-                        new TextMessageContent("id", "taterbot record start"),
-                        LocalDateTime.now().toInstant(ZoneOffset.UTC));
+        MessageEvent<TextMessageContent> textMessageEvent = createGroupSourcedTextMessageEvent("replyTo", "groupId",
+                "userId", "id", "taterbot record start");
 
         UserProfileResponse userProfileResponse = new UserProfileResponse("displayName", "userId", "http://image",
                 "my status");
@@ -124,21 +121,19 @@ public class ChannelRecordIntegrationTest {
         assertTextReplyForClient(lineMessagingClient, "replyTo",
                 "Recording active. Use 'taterbot record stop' to terminate recording.");
 
-        MessageEvent<TextMessageContent> contentMessageEvent =
-                new MessageEvent<>("replyTo", groupSource,
-                        new TextMessageContent("id", "hello all"),
-                        LocalDateTime.now().toInstant(ZoneOffset.UTC));
+        MessageEvent<TextMessageContent> contentMessageEvent = createGroupSourcedTextMessageEvent("replyTo", "groupId",
+                "userId", "id", "hello all");
+        MessageEvent<ImageMessageContent> imageMessageEvent = createGroupSourcedImageMessageEvent("replyTo", "groupId",
+                "userId", "id");
 
-        lineCallback.submit(contentMessageEvent);
+        lineCallback.submit(contentMessageEvent, imageMessageEvent);
 
         verify(lineMessagingClient, times(1)).getGroupMemberProfile("groupId", "userId");
         verifyNoMoreInteractions(lineMessagingClient);
         clearInvocations(lineMessagingClient);
 
-        MessageEvent<TextMessageContent> stopMessageEvent =
-                new MessageEvent<>("replyTo", groupSource,
-                        new TextMessageContent("id", "taterbot record stop"),
-                        LocalDateTime.now().toInstant(ZoneOffset.UTC));
+        MessageEvent<TextMessageContent> stopMessageEvent = createGroupSourcedTextMessageEvent("replyTo", "groupId",
+                "userId", "id", "taterbot record stop");
 
         lineCallback.submit(stopMessageEvent);
 
