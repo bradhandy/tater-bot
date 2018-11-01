@@ -9,14 +9,14 @@ import net.jackofalltrades.taterbot.event.EventContext;
 import org.springframework.stereotype.Component;
 
 @ChannelCommand
-@Component(RecordHelpCommand.NAME)
-class RecordHelpCommand implements Command {
+@Component(ChannelRecordHelpCommand.NAME)
+class ChannelRecordHelpCommand implements Command {
 
     static final String NAME = "record";
 
     private final LineMessagingClient lineMessagingClient;
 
-    RecordHelpCommand(LineMessagingClient lineMessagingClient) {
+    ChannelRecordHelpCommand(LineMessagingClient lineMessagingClient) {
         this.lineMessagingClient = lineMessagingClient;
     }
 

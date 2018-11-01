@@ -14,7 +14,7 @@ class RecordCommandParserVisitor extends BotCommandParserBaseVisitor<Command> {
     public Command visitRecord_action(BotCommandParser.Record_actionContext ctx) {
         String action = ctx.getText();
         if ("help".equals(action)) {
-            return applicationContext.getBean(RecordHelpCommand.NAME, Command.class);
+            return applicationContext.getBean(ChannelRecordHelpCommand.NAME, Command.class);
         } else if ("start".equals(action) || "stop".equals(action)) {
             return applicationContext.getBean(String.format("record-%s", action), Command.class);
         }

@@ -32,10 +32,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = RecordHelpCommandIntegrationTest.SpringBootConfiguration.class)
+@SpringBootTest(classes = ChannelRecordHelpCommandIntegrationTest.SpringBootConfiguration.class)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @AutoConfigureMockMvc
-public class RecordHelpCommandIntegrationTest {
+public class ChannelRecordHelpCommandIntegrationTest {
 
     @Autowired
     private LineCallback lineCallback;

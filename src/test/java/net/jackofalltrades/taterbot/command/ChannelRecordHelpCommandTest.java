@@ -16,28 +16,28 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RecordHelpCommandTest {
+class ChannelRecordHelpCommandTest {
 
     @Mock
     private LineMessagingClient lineMessagingClient;
 
-    private RecordHelpCommand recordHelpCommand;
+    private ChannelRecordHelpCommand channelRecordHelpCommand;
 
     @BeforeEach
     void setUpRecordHelpCommand() {
-        recordHelpCommand = new RecordHelpCommand(lineMessagingClient);
+        channelRecordHelpCommand = new ChannelRecordHelpCommand(lineMessagingClient);
     }
 
     @Test
     void recordHelpCommandName() {
-        assertEquals("record", recordHelpCommand.getName(), "The record help command name does not match.");
+        assertEquals("record", channelRecordHelpCommand.getName(), "The record help command name does not match.");
     }
 
     @Test
     void recordHelpShouldPrintWhenRequestedFromChannel() {
         EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "record help");
 
-        recordHelpCommand.execute();
+        channelRecordHelpCommand.execute();
 
         ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
         verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());
@@ -54,7 +54,7 @@ class RecordHelpCommandTest {
     void recordHelpShouldPrintWhenRequestedFromPrivateChat() {
         EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "record help");
 
-        recordHelpCommand.execute();
+        channelRecordHelpCommand.execute();
 
         ArgumentCaptor<ReplyMessage> replyMessageCaptor = ArgumentCaptor.forClass(ReplyMessage.class);
         verify(lineMessagingClient, times(1)).replyMessage(replyMessageCaptor.capture());

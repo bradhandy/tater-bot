@@ -120,9 +120,9 @@ class TaterBotCommandParserVisitorTest {
 
     @Test
     void recordHelpCommandWhenRequestedWithPrefixInChannel() {
-        doReturn(new RecordHelpCommand(lineMessagingClient))
+        doReturn(new ChannelRecordHelpCommand(lineMessagingClient))
                 .when(applicationContext)
-                .getBean(RecordHelpCommand.NAME, Command.class);
+                .getBean(ChannelRecordHelpCommand.NAME, Command.class);
 
         EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "");
 
@@ -131,14 +131,14 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertTrue(command instanceof RecordHelpCommand, "The command does not match.");
+        assertTrue(command instanceof ChannelRecordHelpCommand, "The command does not match.");
     }
 
     @Test
     void recordHelpCommandWhenRequestedInPrivateChat() {
-        doReturn(new RecordHelpCommand(lineMessagingClient))
+        doReturn(new ChannelRecordHelpCommand(lineMessagingClient))
                 .when(applicationContext)
-                .getBean(RecordHelpCommand.NAME, Command.class);
+                .getBean(ChannelRecordHelpCommand.NAME, Command.class);
 
         EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
 
@@ -147,7 +147,7 @@ class TaterBotCommandParserVisitorTest {
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 
         Command command = commandParser.command().accept(taterBotCommandParserVisitor);
-        assertTrue(command instanceof RecordHelpCommand, "The command does not match.");
+        assertTrue(command instanceof ChannelRecordHelpCommand, "The command does not match.");
     }
 
     @Test
