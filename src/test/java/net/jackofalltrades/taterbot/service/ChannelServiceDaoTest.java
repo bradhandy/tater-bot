@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -26,6 +27,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelServiceDaoTest {
@@ -176,6 +178,22 @@ class ChannelServiceDaoTest {
                         (StringColumnListResultSetExtractor) notNull(), eq("channelId"));
 
         assertSame(expectedMissingServicesList, channelServiceDao.findMissingServicesForChannel("channelId"));
+    }
+
+    @Test
+    void findAllAvailableServices() {
+        List<ChannelService> expectedChannelServices = Lists.newArrayList(
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId"),
+                new ChannelService("channelId", "service2", Service.Status.INACTIVE, LocalDateTime.now(), null));
+
+        doReturn(expectedChannelServices)
+                .when(jdbcTemplate)
+                .query(and(contains("from channel"), not(contains("service_code = ?"))),
+                        (ChannelServiceRowMapper) notNull(), eq("channelId"));
+
+        List<ChannelService> channelServices = channelServiceDao.retrieveChannelServices("channelId");
+
+        assertSame(expectedChannelServices, channelServices, "The list of ChannelService instances does not match.");
     }
 
 }

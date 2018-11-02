@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -33,6 +34,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,6 +94,22 @@ class ChannelServiceManagerTest {
         Optional<ChannelService> optionalChannelService =
                 channelServiceManager.findChannelServiceByKey(new ChannelServiceKey("channelId", "service"));
         assertFalse(optionalChannelService.isPresent(), "The should not have been a channel service returned.");
+    }
+
+    @Test
+    void retrieveAllChannelServices() {
+        List<ChannelService> expectedChannelServices = Lists.newArrayList(
+                new ChannelService("channelId", "service", Service.Status.ACTIVE, LocalDateTime.now(), "userId"),
+                new ChannelService("channelId", "service2", Service.Status.INACTIVE, LocalDateTime.now(), null));
+
+        doReturn(expectedChannelServices)
+                .when(jdbcTemplate)
+                .query(and(contains("from channel_service"), not(contains("service_code = ?"))),
+                        (ChannelServiceRowMapper) notNull(), eq("channelId"));
+
+        List<ChannelService> channelServices = channelServiceManager.retrieveChannelServices("channelId");
+
+        assertSame(expectedChannelServices, channelServices, "The list of ChannelService instances does not match.");
     }
 
     @Test

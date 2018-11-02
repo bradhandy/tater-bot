@@ -23,11 +23,11 @@ import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-@Component(ChannelServiceStatusCommand.NAME)
+@Component(ServiceStatusCommand.NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-class ChannelServiceStatusCommand implements Command, ServiceNameAware {
+class ServiceStatusCommand implements Command, ServiceNameAware {
 
-    static final Logger LOG = LoggerFactory.getLogger(ChannelServiceStatusCommand.class);
+    static final Logger LOG = LoggerFactory.getLogger(ServiceStatusCommand.class);
     static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'");
     static final String NAME = "service-status";
 
@@ -38,7 +38,7 @@ class ChannelServiceStatusCommand implements Command, ServiceNameAware {
 
     private String serviceName;
 
-    ChannelServiceStatusCommand(LineMessagingClient lineMessagingClient, ServiceManager serviceManager,
+    ServiceStatusCommand(LineMessagingClient lineMessagingClient, ServiceManager serviceManager,
             ChannelServiceManager channelServiceManager,
             LoadingCache<ChannelUserProfileKey, UserProfileResponse> channelUserProfileCache) {
         this.lineMessagingClient = lineMessagingClient;
@@ -103,7 +103,7 @@ class ChannelServiceStatusCommand implements Command, ServiceNameAware {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChannelServiceStatusCommand that = (ChannelServiceStatusCommand) o;
+        ServiceStatusCommand that = (ServiceStatusCommand) o;
         return Objects.equals(serviceName, that.serviceName);
     }
 

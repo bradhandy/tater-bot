@@ -30,7 +30,7 @@ class ServiceCommandParserVisitor extends BotCommandParserBaseVisitor<Command> {
 
     @Override
     public Command visitService_list_action(BotCommandParser.Service_list_actionContext ctx) {
-        return null;
+        return applicationContext.getBean(ServiceListCommand.NAME, Command.class);
     }
 
     @Override

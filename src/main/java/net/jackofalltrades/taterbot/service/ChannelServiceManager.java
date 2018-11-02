@@ -73,4 +73,8 @@ public class ChannelServiceManager {
                 channelService.getStatus(), channelService.getStatusDate(), endDateTime, channelService.getUserId());
     }
 
+    public List<ChannelService> retrieveChannelServices(String channelId) {
+        return channelServiceDao.retrieveChannelServices(channelId);
+    }
+
 }

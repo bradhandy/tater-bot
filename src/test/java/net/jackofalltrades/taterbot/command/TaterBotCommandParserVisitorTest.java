@@ -152,9 +152,9 @@ class TaterBotCommandParserVisitorTest {
 
     @Test
     void channelServiceStatusCommandWhenRequestedWithPrefixInChannel() {
-        doReturn(new ChannelServiceStatusCommand(null, null, null, null))
+        doReturn(new ServiceStatusCommand(null, null, null, null))
                 .when(applicationContext)
-                .getBean(ChannelServiceStatusCommand.NAME, Command.class);
+                .getBean(ServiceStatusCommand.NAME, Command.class);
 
         EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "");
 
@@ -166,10 +166,9 @@ class TaterBotCommandParserVisitorTest {
         assertNotNull(command, "There should have been a command returned.");
         assertEquals("service-status", command.getName(), "The command name does not match.");
 
-        ChannelServiceStatusCommand channelServiceStatusCommand = new ChannelServiceStatusCommand(null, null, null,
-                null);
-        channelServiceStatusCommand.setServiceName("record");
-        assertEquals(channelServiceStatusCommand, command, "The command does not match.");
+        ServiceStatusCommand serviceStatusCommand = new ServiceStatusCommand(null, null, null, null);
+        serviceStatusCommand.setServiceName("record");
+        assertEquals(serviceStatusCommand, command, "The command does not match.");
     }
 
     @Test
@@ -177,6 +176,35 @@ class TaterBotCommandParserVisitorTest {
         EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
 
         BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("service status record"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertTrue(command instanceof UnknownCommand, "The command does not match.");
+    }
+
+    @Test
+    void channelServiceListCommandWhenRequestedWithPrefixInChannel() {
+        doReturn(new ServiceListCommand(null, null))
+                .when(applicationContext)
+                .getBean(ServiceListCommand.NAME, Command.class);
+
+        EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("taterbot service list"));
+        TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
+        BotCommandParser commandParser = new BotCommandParser(tokenStream);
+
+        Command command = commandParser.command().accept(taterBotCommandParserVisitor);
+        assertNotNull(command, "There should have been a command returned.");
+        assertEquals("service-list", command.getName(), "The command name does not match.");
+    }
+
+    @Test
+    void channelServiceListCommandWhenRequestedInPrivateChat() {
+        EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "");
+
+        BotCommandLexer botCommandLexer = new BotCommandLexer(CharStreams.fromString("service list"));
         TokenStream tokenStream = new CommonTokenStream(botCommandLexer);
         BotCommandParser commandParser = new BotCommandParser(tokenStream);
 

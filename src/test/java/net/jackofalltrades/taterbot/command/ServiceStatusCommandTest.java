@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeoutException;
 
 @ExtendWith(MockitoExtension.class)
-class ChannelServiceStatusCommandTest {
+class ServiceStatusCommandTest {
 
     // TODO  account for user time zones when that functionality is added.
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'");
@@ -51,13 +51,13 @@ class ChannelServiceStatusCommandTest {
     @Mock
     private LoadingCache<ChannelUserProfileKey, UserProfileResponse> channelUserProfileCache;
 
-    private ChannelServiceStatusCommand channelServiceStatusCommand;
+    private ServiceStatusCommand serviceStatusCommand;
 
     @BeforeEach
     void setUpChannelServiceStatusCommand() {
-        channelServiceStatusCommand = new ChannelServiceStatusCommand(lineMessagingClient, serviceManager,
+        serviceStatusCommand = new ServiceStatusCommand(lineMessagingClient, serviceManager,
                 channelServiceManager, channelUserProfileCache);
-        channelServiceStatusCommand.setServiceName("record");
+        serviceStatusCommand.setServiceName("record");
     }
 
     @Test
@@ -82,7 +82,7 @@ class ChannelServiceStatusCommandTest {
                 .when(channelUserProfileCache)
                 .getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
 
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.execute();
 
         ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
                 String.format("'record' service is active as of %s. (changed by @displayName)",
@@ -110,7 +110,7 @@ class ChannelServiceStatusCommandTest {
                 .when(channelServiceManager)
                 .findChannelServiceByKey(new ChannelServiceKey("channelId", "record"));
 
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.execute();
 
         ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
                 String.format("'record' service is inactive as of %s.",
@@ -141,7 +141,7 @@ class ChannelServiceStatusCommandTest {
                 .when(channelUserProfileCache)
                 .getUnchecked(new ChannelUserProfileKey("channelId", "userId"));
 
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.execute();
 
         ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
                 String.format("'record' service is inactive as of %s.",
@@ -156,7 +156,7 @@ class ChannelServiceStatusCommandTest {
     void serviceStatusShouldNotPrintWhenRequestedFromPrivateChat() {
         EventTestingUtil.setupUserSourcedTextMessageEvent("replyToken", "userId", "id", "service record status");
 
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.execute();
 
         verify(lineMessagingClient, never()).replyMessage(any(ReplyMessage.class));
         verify(serviceManager, never()).findServiceByCode(anyString());
@@ -173,8 +173,8 @@ class ChannelServiceStatusCommandTest {
                 .when(channelServiceManager)
                 .findChannelServiceByKey(new ChannelServiceKey("channelId", "invalid"));
 
-        channelServiceStatusCommand.setServiceName("invalid");
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.setServiceName("invalid");
+        serviceStatusCommand.execute();
 
         ReplyMessageAssertions.assertTextReplyForClient(lineMessagingClient, "replyToken",
                 "'invalid' is an invalid service for this channel.");
@@ -189,8 +189,8 @@ class ChannelServiceStatusCommandTest {
         EventTestingUtil.setupGroupSourcedTextMessageEvent("replyToken", "channelId", "userId", "id",
                 "service status invalid");
 
-        channelServiceStatusCommand.setServiceName(null);
-        channelServiceStatusCommand.execute();
+        serviceStatusCommand.setServiceName(null);
+        serviceStatusCommand.execute();
 
         verify(channelServiceManager, never()).findChannelServiceByKey(any(ChannelServiceKey.class));
         verify(lineMessagingClient, never()).replyMessage(any(ReplyMessage.class));

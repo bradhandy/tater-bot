@@ -59,4 +59,9 @@ class ChannelServiceDao {
                         "where cs.service_code is null", stringColumnListResultSetExtractor,
                 channelId);
     }
+
+    List<ChannelService> retrieveChannelServices(String channelId) {
+        return jdbcTemplate.query("select * from channel_service where channel_id = ?", channelServiceRowMapper,
+                channelId);
+    }
 }
