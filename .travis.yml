@@ -2,6 +2,10 @@ language: java
 
 sudo: false
 
+addons:
+  sonarcloud:
+    organization: "bradhandy-github"
+
 jdk:
   - openjdk8
   - openjdk9
@@ -10,14 +14,17 @@ jdk:
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
 
 script:
   - ./gradlew --stacktrace check
   - ./gradlew jacocoTestReport
+  - sonar-scanner
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
