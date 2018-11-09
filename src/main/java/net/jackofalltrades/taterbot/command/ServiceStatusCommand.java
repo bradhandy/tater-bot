@@ -79,7 +79,7 @@ class ServiceStatusCommand implements Command, ServiceNameAware {
         }
 
         String changedByString = userProfileResponse
-                .transform((userProfile) -> String.format(" (changed by @%s)", userProfile.getDisplayName()))
+                .transform(userProfile -> String.format(" (changed by @%s)", userProfile.getDisplayName()))
                 .or("");
         return String.format("'%s' service is %s as of %s.%s", service.getCode(),
                 channelService.getStatus().name().toLowerCase(),

@@ -122,7 +122,7 @@ public class ChannelRecordManager {
             String typeName = identifyMessageType(messageContent);
             String userId = source.getUserId();
             String userDisplayName = retrieveUserProfileInChannel(channelId, userId)
-                    .transform((profileResponse) -> profileResponse.getDisplayName())
+                    .transform(UserProfileResponse::getDisplayName)
                     .orNull();
             ChannelRecord channelRecord = new ChannelRecord(channelId, userId, userDisplayName, typeName,
                     LocalDateTime.ofInstant(messageEvent.getTimestamp(), ZoneOffset.UTC), messageSupplier.get());
@@ -132,15 +132,13 @@ public class ChannelRecordManager {
 
     private String identifyMessageType(MessageContent messageContent) {
         JsonTypeName jsonTypeName = AnnotationUtils.findAnnotation(messageContent.getClass(), JsonTypeName.class);
-        return Optional.fromNullable(jsonTypeName)
-                .transform(annotation -> annotation.value())
-                .or("unknown");
+        return Optional.fromNullable(jsonTypeName).transform(JsonTypeName::value).or("unknown");
     }
 
     private boolean recordingServiceIsEnabled(String channelId) {
         return channelServiceManager
                 .findChannelServiceByKey(new ChannelServiceKey(channelId, Service.RECORD_SERVICE_CODE))
-                .transform((channelService) -> channelService.getStatus() == Service.Status.ACTIVE)
+                .transform(channelService -> channelService.getStatus() == Service.Status.ACTIVE)
                 .or(false);
     }
 

@@ -30,7 +30,7 @@ class ServiceListCommand implements Command {
     public void execute() {
         if (EventContext.isGroupEvent()) {
             List<ChannelService> channelServices = EventContext.getGroupId()
-                    .transform((channelId) -> channelServiceManager.retrieveChannelServices(channelId))
+                    .transform(channelServiceManager::retrieveChannelServices)
                     .or(EMPTY_CHANNEL_SERVICE_LIST);
             if (!channelServices.isEmpty()) {
                 StringBuilder messageBuffer = new StringBuilder("Channel Services:\n");

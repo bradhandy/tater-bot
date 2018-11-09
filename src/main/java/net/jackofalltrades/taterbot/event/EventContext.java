@@ -41,7 +41,7 @@ public final class EventContext {
     public static Optional<String> getReplyToken() {
         Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
         if (currentEvent.isPresent() && currentEvent.get() instanceof ReplyEvent) {
-            return currentEvent.transform((event) -> ((ReplyEvent) event).getReplyToken());
+            return currentEvent.transform(event -> ((ReplyEvent) event).getReplyToken());
         }
 
         return absent();
@@ -50,7 +50,7 @@ public final class EventContext {
     public static Optional<String> getGroupId() {
         if (isGroupEvent()) {
             Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
-            return currentEvent.transform((event) -> event.getSource().getSenderId());
+            return currentEvent.transform(event -> event.getSource().getSenderId());
         }
 
         return Optional.absent();
@@ -67,13 +67,13 @@ public final class EventContext {
     public static Optional<LocalDateTime> getTimestamp() {
         Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
         return currentEvent.transform(
-                (event) -> LocalDateTime.ofInstant(event.getTimestamp(), ZoneId.of(ZoneOffset.UTC.getId())));
+                event -> LocalDateTime.ofInstant(event.getTimestamp(), ZoneId.of(ZoneOffset.UTC.getId())));
     }
 
     public static <T extends MessageContent> Optional<T> getMessageContent() {
         Optional<? extends Event> currentEvent = CURRENT_EVENT.get();
         if (currentEvent.isPresent() && currentEvent.get() instanceof MessageEvent) {
-            return currentEvent.transform((event) -> ((MessageEvent<T>) event).getMessage());
+            return currentEvent.transform(event -> ((MessageEvent<T>) event).getMessage());
         }
 
         return absent();
@@ -89,8 +89,12 @@ public final class EventContext {
     }
 
     public static boolean isGroupEvent() {
-        Source eventSource = CURRENT_EVENT.get().transform((event) -> ((Event) event).getSource()).orNull();
+        Source eventSource = CURRENT_EVENT.get().transform(event -> ((Event) event).getSource()).orNull();
         return eventSource instanceof GroupSource || eventSource instanceof RoomSource;
+    }
+
+    private EventContext() {
+
     }
 
 }
