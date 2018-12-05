@@ -6,11 +6,9 @@ addons:
   sonarcloud:
     organization: "bradhandy-github"
 
-jdk:
-  - openjdk8
-
 matrix:
   include:
+    - jdk: openjdk8
     - jdk: openjdk9
       before_install:
         - rm "${JAVA_HOME}/lib/security/cacerts"
