@@ -8,8 +8,17 @@ addons:
 
 jdk:
   - openjdk8
-  - openjdk9
-  - openjdk10
+
+matrix:
+  include:
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+    - jdk: openjdk10
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

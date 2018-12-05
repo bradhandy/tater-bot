@@ -32,10 +32,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = InitialDatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class)
+@SpringBootTest(classes = DatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class)
 @TestPropertySource(locations = "initial-db-migration-tests.properties")
 @Transactional
-public class InitialDatabaseMigrationTest {
+public class DatabaseMigrationTest {
 
     private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =
             ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC")
