@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.0.RELEASE' apply true
+    id 'org.springframework.boot' version '2.1.1.RELEASE' apply true
 }
 
 apply plugin: 'java'
