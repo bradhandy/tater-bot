@@ -33,7 +33,7 @@ import java.time.ZoneOffset;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ChannelRecordHelpCommandIntegrationTest.SpringBootConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 public class ChannelRecordHelpCommandIntegrationTest {
 

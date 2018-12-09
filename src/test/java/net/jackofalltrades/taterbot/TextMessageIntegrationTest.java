@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TextMessageIntegrationTest.SpringBootConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 public class TextMessageIntegrationTest {
 

@@ -33,24 +33,9 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DatabaseMigrationTest.InitialDatabaseMigrationTestsConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @Transactional
 public class DatabaseMigrationTest {
-
-    private static final Map<String, String> EXPECTED_TABLES_IN_SCHEMAS =
-            ImmutableMap.<String, String>builder().put("SERVICE", "PUBLIC")
-                    .put("SERVICE_HISTORY", "PUBLIC")
-                    .put("CHANNEL_SERVICE", "PUBLIC")
-                    .put("CHANNEL_SERVICE_HISTORY", "PUBLIC")
-                    .put("CHANNEL", "PUBLIC")
-                    .put("CHANNEL_HISTORY", "PUBLIC")
-                    .put("ADMIN", "PUBLIC")
-                    .put("ADMIN_HISTORY", "PUBLIC")
-                    .put("CHANNEL_ADMIN", "PUBLIC")
-                    .put("CHANNEL_ADMIN_HISTORY", "PUBLIC")
-                    .put("CHANNEL_RECORD", "PUBLIC")
-                    .put("DATABASECHANGELOG", "PUBLIC")
-                    .put("DATABASECHANGELOGLOCK", "PUBLIC").build();
 
     @Autowired
     private JdbcTemplate testDatabaseTemplate;
@@ -60,22 +45,6 @@ public class DatabaseMigrationTest {
 
     @Autowired
     private ChannelServiceManager channelServceManager;
-
-    @Test
-    public void databaseTablesCreatedSuccessfully() {
-        Map<String, String> actualTableToSchemaMap =
-                testDatabaseTemplate.query("show tables from public", (ResultSetExtractor<Map<String, String>>) rs -> {
-                    ImmutableMap.Builder<String, String> tableToSchemaMap = ImmutableMap.builder();
-                    while (rs.next()) {
-                        tableToSchemaMap.put(rs.getString("TABLE_NAME"), rs.getString("TABLE_SCHEMA"));
-                    }
-
-                    return tableToSchemaMap.build();
-                });
-
-        assertEquals("The tables created did not match the expected tables.", EXPECTED_TABLES_IN_SCHEMAS,
-                actualTableToSchemaMap);
-    }
 
     @Test
     public void serviceTableFunctionalityWorksCorrectly() {

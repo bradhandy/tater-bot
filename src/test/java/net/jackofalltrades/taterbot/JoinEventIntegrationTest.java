@@ -35,7 +35,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JoinEventIntegrationTest.SpringBootConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 public class JoinEventIntegrationTest {
 

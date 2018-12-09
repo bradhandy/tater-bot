@@ -38,7 +38,7 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HelpCommandIntegerationTest.SpringBootConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 public class HelpCommandIntegerationTest {
 

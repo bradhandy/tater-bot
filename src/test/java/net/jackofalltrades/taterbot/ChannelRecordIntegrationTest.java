@@ -44,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ChannelRecordIntegrationTest.SpringBootConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 public class ChannelRecordIntegrationTest {
 

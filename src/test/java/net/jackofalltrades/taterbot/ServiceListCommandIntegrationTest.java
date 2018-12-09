@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceListCommandIntegrationTest.SpringConfiguration.class)
-@TestPropertySource(locations = "initial-db-migration-tests.properties")
+@TestPropertySource(locations = "integration-test.properties")
 @AutoConfigureMockMvc
 @Transactional
 public class ServiceListCommandIntegrationTest {
