@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.ContentProvider;
 import com.linecorp.bot.model.event.message.ImageMessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
@@ -546,7 +547,8 @@ class ChannelRecordManagerTest {
                 "imageMessageId");
         MessageEvent<ImageMessageContent> imageMessageEvent =
                 new MessageEvent<>("replyToken", new GroupSource("channelId", "userId"),
-                        new ImageMessageContent("imageMessageId"), messageDate.toInstant(ZoneOffset.UTC));
+                        new ImageMessageContent("imageMessageId", new ContentProvider("line", null, null)),
+                        messageDate.toInstant(ZoneOffset.UTC));
 
         channelRecordManager.recordEvent(imageMessageEvent);
 
@@ -566,7 +568,8 @@ class ChannelRecordManagerTest {
         LocalDateTime messageDate = LocalDateTime.now();
         MessageEvent<ImageMessageContent> imageMessageEvent =
                 new MessageEvent<>("replyToken", new GroupSource("channelId", "userId"),
-                        new ImageMessageContent("imageMessageId"), messageDate.toInstant(ZoneOffset.UTC));
+                        new ImageMessageContent("imageMessageId",  new ContentProvider("line", null, null)),
+                        messageDate.toInstant(ZoneOffset.UTC));
 
         channelRecordManager.recordEvent(imageMessageEvent);
 

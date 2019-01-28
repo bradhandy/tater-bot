@@ -38,7 +38,8 @@ public class LineCallback {
     }
 
     public void submit(Event... events) throws JsonProcessingException {
-        CallbackRequest callbackRequest = new CallbackRequest(Lists.newArrayList(events));
+        CallbackRequest callbackRequest = new CallbackRequest(Lists.newArrayList(events),
+                "U00000000000000000000000000000000");
         String hmacHash = linePayloadEncoder.encodePayload(callbackRequest);
         try {
             mockMvc.perform(post("/callback")

@@ -1,6 +1,7 @@
 package net.jackofalltrades.taterbot.util;
 
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.ContentProvider;
 import com.linecorp.bot.model.event.message.ImageMessageContent;
 import com.linecorp.bot.model.event.message.StickerMessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
@@ -37,7 +38,8 @@ public final class EventTestingUtil {
     public static MessageEvent<ImageMessageContent> createGroupSourcedImageMessageEvent(String replyToken,
             String channelId, String userId, String imageMessageId) {
         return new MessageEvent<>(replyToken, new GroupSource(channelId, userId),
-                new ImageMessageContent(imageMessageId), LocalDateTime.now().toInstant(ZoneOffset.UTC));
+                new ImageMessageContent(imageMessageId, new ContentProvider("line", null, null)),
+                LocalDateTime.now().toInstant(ZoneOffset.UTC));
     }
 
     public static MessageEvent<StickerMessageContent> createGroupSourcedStickerMessageEvent(String replyTo,
@@ -50,5 +52,7 @@ public final class EventTestingUtil {
     private EventTestingUtil() {
 
     }
+
+
 
 }

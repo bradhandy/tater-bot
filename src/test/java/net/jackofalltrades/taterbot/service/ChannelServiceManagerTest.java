@@ -23,7 +23,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import net.jackofalltrades.taterbot.util.MockitoParameterResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -183,7 +182,6 @@ class ChannelServiceManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithoutUserIdOnOriginalChannelService(
             @Mock LoadingCache<String, Service> serviceCache,
             @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {
@@ -238,7 +236,6 @@ class ChannelServiceManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithUserIdOnOriginalChannelService(
             @Mock LoadingCache<String, Service> serviceCache,
             @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {
@@ -293,7 +290,6 @@ class ChannelServiceManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void channelServiceHistoryRowCreatedWhenStatusChangeRequestedWithDifferentUserIdOnOriginalChannelService(
             @Mock LoadingCache<String, Service> serviceCache,
             @Mock LoadingCache<ChannelServiceKey, ChannelService> channelServiceCache) {

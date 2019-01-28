@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.1.RELEASE' apply true
+    id 'org.springframework.boot' version '2.1.2.RELEASE' apply true
 }
 
 apply plugin: 'java'
@@ -40,7 +40,8 @@ jacocoTestReport {
 
 idea {
     project {
-        languageLevel = '1.8'
+        jdkName = '11'
+        languageLevel = '11'
     }
     module {
         downloadJavadoc = true
@@ -60,16 +61,19 @@ dependencyManagement {
     // Mockito upgraded, comment this dependency management entry to find the new required version of
     // byte-buddy.
     dependencies {
-        dependencySet(group: 'net.bytebuddy', version: '1.8.10') {
-            entry "byte-buddy"
-            entry "byte-buddy-agent"
+
+        // the line sdk requires okhttp3 for some reason, but the version pulled in is 3.8.1 and it requires 3.12.0
+        // since 3.12.1 was available, I locked in the version to 3.12.1.
+        dependencySet(group: 'com.squareup.okhttp3', version: '3.12.1') {
+            entry "logging-interceptor"
+            entry "okhttp"
         }
     }
 
     // Ordering is important.  If the aws-java-sdk-bom is first, then the spring cloud framework will override the
     // version with an older version.
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Greenwich.M3"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Greenwich.RELEASE"
         mavenBom "com.amazonaws:aws-java-sdk-bom:1.11.431"
     }
 }
@@ -77,7 +81,7 @@ dependencyManagement {
 dependencies {
     antlr 'org.antlr:antlr4:4.7.1'
 
-    compile("com.linecorp.bot:line-bot-spring-boot:2.1.0") {
+    compile("com.linecorp.bot:line-bot-spring-boot:2.4.0") {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     compile("org.springframework.boot:spring-boot-starter-jetty")
@@ -99,12 +103,16 @@ dependencies {
         exclude group: 'org.mockito', module: 'mockito-core'
     }
 
-    testCompile("org.mockito:mockito-core:2.19.6")
-    testCompile("org.mockito:mockito-junit-jupiter:2.19.6")
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.3.0")
-    testCompile("org.junit.jupiter:junit-jupiter-params:5.3.0")
-    testCompile("org.junit.vintage:junit-vintage-engine:5.3.0")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.0")
+    testCompile("org.mockito:mockito-core:2.23.4")
+    testCompile("org.mockito:mockito-junit-jupiter:2.23.4")
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
+    testCompile("org.junit.jupiter:junit-jupiter-params:5.3.2")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
+
+    // have to include the junit:junit:4.12 dependency because Gradle 5 excludes runtime dependencies from the compile-
+    // time 
+    testCompile("org.junit.vintage:junit-vintage-engine:5.3.2")
+    testCompile("junit:junit:4.12")
 
     // this is used to verify the liquibase functionality against a database.
     testRuntime("com.h2database:h2:1.4.197")

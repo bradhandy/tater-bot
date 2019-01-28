@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import net.jackofalltrades.taterbot.util.MockitoParameterResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,7 +89,6 @@ class ChannelRecordDaoTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void handleChannelRecordsAsTheyAreProcessedFromTheResultSet(@Mock ChannelRecordProcessor channelRecordProcessor) {
         LocalDateTime beginTimestamp = LocalDateTime.now().minus(5, ChronoUnit.MINUTES);
         LocalDateTime endTimestamp = LocalDateTime.now();

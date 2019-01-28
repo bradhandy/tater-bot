@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import net.jackofalltrades.taterbot.util.MockitoParameterResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,7 +65,6 @@ class ServiceManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void statusUpdateShouldAddHistoryEntry(@Mock LoadingCache<String, Service> serviceLoadingCache) {
         serviceManager = new ServiceManager(serviceLoadingCache, serviceDao, serviceHistoryDao);
 

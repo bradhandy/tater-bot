@@ -17,7 +17,6 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import net.jackofalltrades.taterbot.util.MockitoParameterResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,7 +125,6 @@ class ChannelManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void channelJoinedWhenSeenBeforeAndNotCurrentlyJoined(@Mock LoadingCache<String, Channel> channelCache) {
         channelManager = spy(new ChannelManager(channelCache, channelDao, channelHistoryDao));
 
@@ -171,7 +169,6 @@ class ChannelManagerTest {
     }
 
     @Test
-    @ExtendWith(MockitoParameterResolver.class)
     void channelLeftWhenSeenBeforeAndCurrentlyJoined(@Mock LoadingCache<String, Channel> channelCache) {
         channelManager = spy(new ChannelManager(channelCache, channelDao, channelHistoryDao));
 
